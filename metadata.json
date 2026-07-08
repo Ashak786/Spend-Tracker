@@ -1,0 +1,6 @@
+{
+  "name": "Salary Spend Tracker",
+  "description": "A personal spend tracking app for tracking salary and expenses in INR with multiple user profile support and Indian date format statement exports.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

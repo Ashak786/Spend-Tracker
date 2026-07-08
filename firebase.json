@@ -1,0 +1,8 @@
+{
+  "firestore": [
+    {
+      "database": "ai-studio-salaryspendtrack-f1f34ee2-f170-4536-ad3b-fd7d87158786",
+      "rules": "firestore.rules"
+    }
+  ]
+}

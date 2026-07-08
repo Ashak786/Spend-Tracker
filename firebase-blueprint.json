@@ -1,0 +1,40 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with name and salary info",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for user" },
+        "name": { "type": "string", "description": "Name of the user" },
+        "salary": { "type": "number", "description": "Monthly salary" },
+        "joinedAt": { "type": "string", "description": "Date of joining/creation" }
+      },
+      "required": ["id", "name", "salary", "joinedAt"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "Transaction entry for salary spent",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for transaction" },
+        "userId": { "type": "string", "description": "The user ID this transaction belongs to" },
+        "title": { "type": "string", "description": "Title of the spend" },
+        "amount": { "type": "number", "description": "Amount spent" },
+        "category": { "type": "string", "description": "Category of spend" },
+        "date": { "type": "string", "description": "Date of transaction (YYYY-MM-DD)" }
+      },
+      "required": ["id", "userId", "title", "amount", "category", "date"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profiles database"
+    },
+    "transactions/{transactionId}": {
+      "schema": "Transaction",
+      "description": "User transactions list"
+    }
+  }
+}
