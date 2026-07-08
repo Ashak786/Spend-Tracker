@@ -231,42 +231,6 @@ export default function App() {
             <div className="flex items-center gap-3">
               <LogoFull size={42} />
             </div>
-
-            <div className="flex items-center gap-3 shrink-0">
-              {(users.length > 0 || transactions.length > 0) && (
-                isConfirmingClear ? (
-                  <div className="flex items-center gap-1.5 bg-red-50 border-2 border-red-200 rounded-2xl p-1 shrink-0">
-                    <span className="text-[9px] sm:text-[10px] font-black text-red-600 uppercase tracking-widest pl-1.5 hidden xs:inline">Wipe?</span>
-                    <button
-                      onClick={() => {
-                        handleClearAllData();
-                        setIsConfirmingClear(false);
-                      }}
-                      className="px-2.5 py-1 text-[10px] sm:text-xs font-black text-white bg-red-600 hover:bg-red-700 rounded-xl transition-colors cursor-pointer"
-                    >
-                      Clear
-                    </button>
-                    <button
-                      onClick={() => setIsConfirmingClear(false)}
-                      className="px-2.5 py-1 text-[10px] sm:text-xs font-bold text-slate-500 hover:bg-slate-200 bg-white rounded-xl border border-slate-200 transition-colors cursor-pointer"
-                    >
-                      No
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => setIsConfirmingClear(true)}
-                    className="group flex items-center gap-1.5 px-3 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 bg-white rounded-2xl border-2 border-red-200 shadow-xs transition-all duration-300 ease-in-out cursor-pointer"
-                    aria-label="Clear Data"
-                  >
-                    <X className="w-4 h-4 shrink-0" />
-                    <span className="max-w-0 overflow-hidden sm:group-hover:max-w-[120px] transition-all duration-300 ease-in-out whitespace-nowrap text-xs font-bold hidden sm:inline">
-                      Clear Data
-                    </span>
-                  </button>
-                )
-              )}
-            </div>
           </div>
         </header>
 
@@ -406,16 +370,52 @@ export default function App() {
         )}
 
         {/* Footer */}
-        <footer className="bg-white border-2 border-slate-200 rounded-3xl sm:rounded-[32px] p-4 sm:p-6 text-center text-xs text-slate-400 shadow-sm mt-4 sm:mt-6">
-          <div className="space-y-2">
-            <div className="flex items-center justify-center gap-1.5 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
-              <Sparkles className="w-4 h-4 text-teal-600" />
-              <span>Spend Wisely Tracker — INR Ledger Standard</span>
+        <footer className="bg-white border-2 border-slate-200 rounded-3xl sm:rounded-[32px] p-4 sm:p-6 shadow-sm mt-4 sm:mt-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-left space-y-1">
+              <div className="flex items-center gap-1.5 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+                <Sparkles className="w-4 h-4 text-teal-600" />
+                <span>Spend Wisely Tracker — INR Ledger Standard</span>
+              </div>
+              <p className="text-[10px] text-teal-500 font-bold uppercase tracking-widest flex items-center gap-1">
+                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse inline-block"></span>
+                Cloud Ledger Synchronized
+              </p>
             </div>
-            <p className="text-[10px] text-teal-500 font-bold uppercase tracking-widest flex items-center justify-center gap-1">
-              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse inline-block"></span>
-              Cloud Ledger Synchronized
-            </p>
+
+            <div className="shrink-0">
+              {(users.length > 0 || transactions.length > 0) && (
+                isConfirmingClear ? (
+                  <div className="flex items-center gap-1.5 bg-red-50 border-2 border-red-200 rounded-2xl p-1 shrink-0">
+                    <span className="text-[9px] sm:text-[10px] font-black text-red-600 uppercase tracking-widest pl-1.5">Wipe All?</span>
+                    <button
+                      onClick={() => {
+                        handleClearAllData();
+                        setIsConfirmingClear(false);
+                      }}
+                      className="px-3 py-1.5 text-[10px] sm:text-xs font-black text-white bg-red-600 hover:bg-red-700 rounded-xl transition-colors cursor-pointer"
+                    >
+                      Yes, Clear
+                    </button>
+                    <button
+                      onClick={() => setIsConfirmingClear(false)}
+                      className="px-3 py-1.5 text-[10px] sm:text-xs font-bold text-slate-500 hover:bg-slate-200 bg-white rounded-xl border border-slate-200 transition-colors cursor-pointer"
+                    >
+                      No
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setIsConfirmingClear(true)}
+                    className="flex items-center gap-1.5 px-3.5 py-2 text-red-500 hover:text-red-600 hover:bg-red-50 bg-white rounded-2xl border border-slate-200 hover:border-red-200 shadow-xs transition-all duration-300 text-xs font-bold cursor-pointer"
+                    aria-label="Clear Data"
+                  >
+                    <X className="w-4 h-4 shrink-0" />
+                    <span>Clear All Data</span>
+                  </button>
+                )
+              )}
+            </div>
           </div>
         </footer>
       </main>
