@@ -151,10 +151,16 @@ export default function App() {
 
   // Handler to delete a user profile
   const handleDeleteUser = async (userId: string) => {
-    await deleteUserProfileAndData(userId);
+    // If the deleted user is the current active user, switch to another user first
     if (currentUser?.id === userId) {
-      setCurrentUser(null);
+      const remainingUsers = users.filter(u => u.id !== userId);
+      if (remainingUsers.length > 0) {
+        setCurrentUser(remainingUsers[0]);
+      } else {
+        setCurrentUser(null);
+      }
     }
+    await deleteUserProfileAndData(userId);
   };
 
   // Handler to record a transaction
