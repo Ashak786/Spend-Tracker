@@ -15,6 +15,7 @@ export type CategoryType =
   | 'Shopping'
   | 'Healthcare & Insurance'
   | 'EMI & Loan'
+  | 'Subscriptions'
   | 'Other Expenses';
 
 export interface CategoryBudget {

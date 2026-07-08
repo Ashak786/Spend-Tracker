@@ -13,6 +13,7 @@ import {
   Landmark,
   HelpCircle,
   PieChart,
+  Play,
 } from 'lucide-react';
 
 interface ExpenseCategoryListProps {
@@ -34,6 +35,7 @@ export const CATEGORY_META: Record<
   'Shopping': { icon: Tag, color: 'text-purple-600', bg: 'bg-purple-50', barBg: 'bg-purple-600' },
   'Healthcare & Insurance': { icon: Activity, color: 'text-red-600', bg: 'bg-red-50', barBg: 'bg-red-600' },
   'EMI & Loan': { icon: Landmark, color: 'text-teal-600', bg: 'bg-teal-50', barBg: 'bg-teal-600' },
+  'Subscriptions': { icon: Play, color: 'text-indigo-600', bg: 'bg-indigo-50', barBg: 'bg-indigo-600' },
   'Other Expenses': { icon: HelpCircle, color: 'text-pink-600', bg: 'bg-pink-50', barBg: 'bg-pink-600' },
 };
 
