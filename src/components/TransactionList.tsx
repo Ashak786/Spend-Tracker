@@ -43,6 +43,33 @@ export default function TransactionList({
     }
   }, [editingTx]);
 
+  // Helper to parse/evaluate basic math safely
+  const evaluateMath = (val: string): number | null => {
+    const clean = val.replace(/\s+/g, '');
+    if (!clean) return null;
+    // Strict pattern matching: only allow digits, arithmetic operators (+ - * /), decimal points, and parentheses
+    if (!/^[0-9+\-*/().]+$/.test(clean)) return null;
+    try {
+      // Safe dynamic evaluation since pattern is fully validated
+      const result = new Function(`return (${clean})`)();
+      if (typeof result === 'number' && !isNaN(result) && isFinite(result)) {
+        return result;
+      }
+    } catch {
+      // Ignore evaluation errors during typing
+    }
+    return null;
+  };
+
+  const isEquation = /[\+\-\*\/]/.test(editAmount);
+  const evaluatedAmount = evaluateMath(editAmount);
+
+  const handleEditAmountBlur = () => {
+    if (isEquation && evaluatedAmount !== null) {
+      setEditAmount(Number(evaluatedAmount.toFixed(2)).toString());
+    }
+  };
+
   // Filter transactions by current month, search query, and category
   const monthlyTransactions = transactions.filter(t => t.date.startsWith(selectedMonth));
   
@@ -285,12 +312,17 @@ export default function TransactionList({
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                if (!editTitle.trim() || !editAmount || isNaN(Number(editAmount))) return;
+                if (!editTitle.trim() || !editAmount) return;
+                
+                const evaluated = evaluateMath(editAmount);
+                const parsedAmount = evaluated !== null ? evaluated : parseFloat(editAmount);
+                
+                if (isNaN(parsedAmount) || parsedAmount <= 0) return;
                 
                 onUpdateTransaction({
                   ...editingTx,
                   title: editTitle.trim(),
-                  amount: Number(editAmount),
+                  amount: Number(parsedAmount.toFixed(2)),
                   category: editCategory,
                   date: editDate,
                   description: editDescription.trim() || undefined,
@@ -318,22 +350,37 @@ export default function TransactionList({
               {/* Row for Amount and Category */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 mb-1">
-                    Amount (INR)
+                  <label className="block text-xs font-bold text-slate-500 mb-1 flex justify-between items-center">
+                    <span>Amount (INR)</span>
+                    {isEquation && evaluatedAmount !== null && (
+                      <span className="text-[10px] text-slate-400 font-medium">Math Mode</span>
+                    )}
                   </label>
                   <div className="relative">
                     <span className="absolute left-4 top-2.5 text-slate-400 text-sm font-black">₹</span>
                     <input
-                      type="number"
+                      type="text"
                       required
-                      min="0.01"
-                      step="any"
                       value={editAmount}
                       onChange={(e) => setEditAmount(e.target.value)}
-                      placeholder="0.00"
+                      onBlur={handleEditAmountBlur}
+                      placeholder="0.00 (or e.g. 150+45)"
                       className="w-full text-sm pl-8 pr-4 py-2.5 border-2 border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white font-bold text-slate-800"
                     />
                   </div>
+                  {isEquation && (
+                    <div className="mt-1.5 min-h-[1.25rem] flex items-center">
+                      {evaluatedAmount !== null ? (
+                        <span className="text-emerald-600 text-[11px] font-black tracking-wide flex items-center gap-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                          <span className="text-slate-400 font-bold">=</span> {formatCurrency(evaluatedAmount)}
+                        </span>
+                      ) : (
+                        <span className="text-slate-400 text-[10px] font-medium italic">
+                          Type a complete formula...
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div>

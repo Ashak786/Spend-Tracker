@@ -11,7 +11,8 @@ import ExpenseCategoryList from './components/ExpenseCategoryList';
 import TransactionForm from './components/TransactionForm';
 import TransactionList from './components/TransactionList';
 import { LogoFull } from './components/Logo';
-import { IndianRupee, HelpCircle, Sparkles, BookOpen, CreditCard, X } from 'lucide-react';
+import { IndianRupee, HelpCircle, Sparkles, BookOpen, CreditCard, X, Plus } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   subscribeUsers,
   subscribeTransactions,
@@ -33,6 +34,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState('2026-07');
   const [isConfirmingClear, setIsConfirmingClear] = useState(false);
+  const [isMobileFormOpen, setIsMobileFormOpen] = useState(false);
 
   // Subscribe to real-time updates from Firestore
   useEffect(() => {
@@ -77,8 +79,10 @@ export default function App() {
     const hasIdChanged = currentUser?.id !== targetUser?.id;
     const hasNameChanged = currentUser?.name !== targetUser?.name;
     const hasSalaryChanged = currentUser?.salary !== targetUser?.salary;
+    const hasIncentiveChanged = (currentUser?.incentive ?? null) !== (targetUser?.incentive ?? null);
+    const hasMonthlyIncomesChanged = JSON.stringify(currentUser?.monthlyIncomes ?? null) !== JSON.stringify(targetUser?.monthlyIncomes ?? null);
 
-    if (hasIdChanged || hasNameChanged || hasSalaryChanged) {
+    if (hasIdChanged || hasNameChanged || hasSalaryChanged || hasIncentiveChanged || hasMonthlyIncomesChanged) {
       setCurrentUser(targetUser);
     }
     // We intentionally omit currentUser from the dependency array because updates are
@@ -95,6 +99,18 @@ export default function App() {
       localStorage.removeItem(LOCAL_STORAGE_ACTIVE_USER_KEY);
     }
   }, [currentUser]);
+
+  // Prevent background scrolling when mobile drawer is open
+  useEffect(() => {
+    if (isMobileFormOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMobileFormOpen]);
 
   // Migrate local data to Firestore if Firestore is empty on first boot
   useEffect(() => {
@@ -132,11 +148,12 @@ export default function App() {
   };
 
   // Handler to add a new profile
-  const handleAddUser = async (name: string, salary: number) => {
+  const handleAddUser = async (name: string, salary: number, incentive?: number | null) => {
     const newUser: UserProfile = {
       id: `user-${Date.now()}`,
       name,
       salary,
+      incentive: incentive ?? null,
       joinedAt: new Date().toISOString().slice(0, 10),
     };
     await saveUserProfile(newUser);
@@ -174,6 +191,9 @@ export default function App() {
     // Update selectedMonth if the added transaction belongs to a different month
     const addedMonth = newTxData.date.slice(0, 7); // YYYY-MM
     setSelectedMonth(addedMonth);
+    
+    // Auto-close mobile drawer/modal if open
+    setIsMobileFormOpen(false);
   };
 
   // Handler to delete a transaction
@@ -258,15 +278,24 @@ export default function App() {
               </p>
             </div>
 
-            <form onSubmit={(e) => {
+             <form onSubmit={(e) => {
               e.preventDefault();
               const formData = new FormData(e.currentTarget);
               const name = formData.get('name') as string;
               const salaryVal = formData.get('salary') as string;
+              const incentiveVal = formData.get('incentive') as string;
+              
               if (!name.trim() || !salaryVal) return;
               const salaryNum = parseFloat(salaryVal);
               if (isNaN(salaryNum) || salaryNum <= 0) return;
-              handleAddUser(name.trim(), salaryNum);
+              
+              const incentiveNum = incentiveVal ? parseFloat(incentiveVal) : null;
+              
+              handleAddUser(
+                name.trim(),
+                salaryNum,
+                isNaN(incentiveNum ?? NaN) ? null : incentiveNum
+              );
             }} className="space-y-4 text-left max-w-sm mx-auto pt-2">
               <div>
                 <label className="block text-xs font-bold text-slate-500 mb-1">
@@ -296,8 +325,24 @@ export default function App() {
                   />
                 </div>
                 <p className="text-[10px] text-slate-400 mt-1 font-semibold">
-                  This salary sets your monthly spending and balance limit.
+                  This sets your core monthly spending and balance limit.
                 </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 mb-1">
+                  Incentive / Bonus (INR, Optional)
+                </label>
+                <div className="relative">
+                  <span className="absolute left-4 top-2.5 text-slate-400 text-sm font-bold">₹</span>
+                  <input
+                    name="incentive"
+                    type="number"
+                    min="0"
+                    placeholder="e.g. 5000"
+                    className="w-full text-sm pl-8 pr-4 py-2.5 border-2 border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white font-bold text-slate-800"
+                  />
+                </div>
               </div>
 
               <button
@@ -334,6 +379,7 @@ export default function App() {
                     selectedMonth={selectedMonth}
                     onMonthChange={setSelectedMonth}
                     availableMonths={availableMonths}
+                    onUpdateUser={handleUpdateUser}
                   />
                 </section>
 
@@ -347,7 +393,7 @@ export default function App() {
 
               {/* Right Column (Recording & Log sheets) - 5 cols on large screens */}
               <div className="lg:col-span-5 space-y-4 sm:space-y-6">
-                <section id="record-expense-section">
+                <section id="record-expense-section" className="hidden md:block">
                   <TransactionForm
                     userId={currentUser.id}
                     onAddTransaction={handleAddTransaction}
@@ -418,6 +464,68 @@ export default function App() {
             </div>
           </div>
         </footer>
+
+        {/* Floating Action Button for Mobile Expense Addition */}
+        {currentUser && (
+          <>
+            <button
+              onClick={() => setIsMobileFormOpen(true)}
+              className="fixed bottom-6 right-6 z-40 md:hidden bg-teal-600 hover:bg-teal-500 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-[0_8px_30px_rgb(13,148,136,0.4)] active:scale-95 transition-all duration-200 border-2 border-white cursor-pointer group"
+              style={{ bottom: '24px', right: '24px' }}
+              aria-label="Add Expense"
+            >
+              <Plus className="w-7 h-7 transition-transform duration-300 group-hover:rotate-90" />
+            </button>
+
+            {/* Mobile Form Pop-out Modal Overlay */}
+            <AnimatePresence>
+              {isMobileFormOpen && (
+                <>
+                  {/* Backdrop */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={() => setIsMobileFormOpen(false)}
+                    className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50"
+                  />
+
+                  {/* Pop-out Content Container */}
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.92, x: '-50%', y: '-40%' }}
+                    animate={{ opacity: 1, scale: 1, x: '-50%', y: '-50%' }}
+                    exit={{ opacity: 0, scale: 0.92, x: '-50%', y: '-40%' }}
+                    transition={{ type: 'spring', damping: 25, stiffness: 240 }}
+                    className="fixed top-1/2 left-1/2 z-55 bg-white rounded-[32px] p-6 shadow-2xl w-[92vw] max-w-md max-h-[85vh] overflow-y-auto border-2 border-slate-100"
+                  >
+                    <div className="flex items-center justify-between mb-5">
+                      <div className="flex items-center gap-2">
+                        <Plus className="w-5 h-5 text-teal-600 animate-pulse" />
+                        <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">
+                          Record New Expense
+                        </h3>
+                      </div>
+                      <button
+                        onClick={() => setIsMobileFormOpen(false)}
+                        className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl cursor-pointer transition-colors"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+
+                    {/* Actual form body */}
+                    <TransactionForm
+                      userId={currentUser.id}
+                      onAddTransaction={handleAddTransaction}
+                      selectedMonth={selectedMonth}
+                      isModal={true}
+                    />
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+          </>
+        )}
       </main>
     </div>
   );

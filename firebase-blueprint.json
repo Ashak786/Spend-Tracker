@@ -8,7 +8,9 @@
         "id": { "type": "string", "description": "Unique identifier for user" },
         "name": { "type": "string", "description": "Name of the user" },
         "salary": { "type": "number", "description": "Monthly salary" },
-        "joinedAt": { "type": "string", "description": "Date of joining/creation" }
+        "joinedAt": { "type": "string", "description": "Date of joining/creation" },
+        "incentive": { "type": "number", "description": "Optional monthly incentive", "nullable": true },
+        "monthlyIncomes": { "type": "object", "description": "Monthly base salary overrides indexed by YYYY-MM", "nullable": true }
       },
       "required": ["id", "name", "salary", "joinedAt"]
     },

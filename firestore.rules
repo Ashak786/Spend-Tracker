@@ -14,11 +14,12 @@ service cloud.firestore {
     
     function isValidUserProfile(data) {
       return data.keys().hasAll(['id', 'name', 'salary', 'joinedAt'])
-        && data.keys().size() == 4
         && isValidId(data.id)
         && data.name is string && data.name.size() > 0 && data.name.size() <= 100
         && (data.salary is int || data.salary is float) && data.salary >= 0
-        && data.joinedAt is string && data.joinedAt.size() == 10;
+        && data.joinedAt is string && data.joinedAt.size() >= 10
+        && (data.get('incentive', null) == null || ((data.incentive is int || data.incentive is float) && data.incentive >= 0))
+        && (data.get('monthlyIncomes', null) == null || data.monthlyIncomes is map);
     }
     
     function isValidTransaction(data) {

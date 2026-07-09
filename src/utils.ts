@@ -54,6 +54,26 @@ export function formatMonthYear(dateStr: string): string {
 }
 
 /**
+ * Gets the base salary and optional incentive for a user in a specific month,
+ * taking into account any monthly overrides.
+ */
+export function getMonthlyIncomeDetails(user: UserProfile, monthYear: string) {
+  if (user.monthlyIncomes && user.monthlyIncomes[monthYear]) {
+    const override = user.monthlyIncomes[monthYear];
+    return {
+      salary: override.salary,
+      incentive: override.incentive ?? null,
+      isCustom: true,
+    };
+  }
+  return {
+    salary: user.salary,
+    incentive: user.incentive ?? null,
+    isCustom: false,
+  };
+}
+
+/**
  * Exports transactions to a beautiful PDF statement using Indian standards.
  */
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
@@ -249,7 +269,10 @@ export async function exportToPDF(
     .filter(t => t.date.startsWith(selectedMonth))
     .sort((a, b) => a.date.localeCompare(b.date));
   const totalSpent = filtered.reduce((sum, t) => sum + t.amount, 0);
-  const balance = user.salary - totalSpent;
+  
+  const { salary, incentive } = getMonthlyIncomeDetails(user, selectedMonth);
+  const effectiveSalary = salary + (incentive || 0);
+  const balance = effectiveSalary - totalSpent;
 
   // Initialize jsPDF document (standard A4, vertical, mm)
   const doc = new jsPDF({
@@ -319,96 +342,22 @@ export async function exportToPDF(
 
   let y = 48;
   
-  // 3. User Profile & Monthly Financial Summary (Gray Card)
-  const cardHeight = 38;
-  doc.setFillColor(lightBgColor[0], lightBgColor[1], lightBgColor[2]);
-  doc.rect(14, y, 182, cardHeight, 'F');
-  
-  // Outer frame for the card
-  doc.setDrawColor(226, 232, 240);
-  doc.setLineWidth(0.5);
-  doc.rect(14, y, 182, cardHeight, 'D');
-
-  doc.setFont(font, 'bold');
-  doc.setFontSize(10);
-  doc.setTextColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
-  doc.text('LEDGER ACCOUNT SUMMARY', 20, y + 8);
-
-  doc.setFont(font, 'normal');
-  doc.setFontSize(8);
-  doc.text(`Name:                ${user.name}`, 20, y + 18);
-  doc.text(`Statement Period:    ${formatMonthYear(selectedMonth)}`, 20, y + 26);
-
-  // Middle column values (Financial labels and numbers)
-  doc.setFont(font, 'bold');
-  doc.setFontSize(8);
-  doc.text('Base Salary:', 84, y + 16);
-  doc.setFont(font, 'normal');
-  doc.text(`${formatPDFCurrency(user.salary)}`, 112, y + 16);
-
-  doc.setFont(font, 'bold');
-  doc.text('Total Spent:', 84, y + 23);
-  doc.setFont(font, 'normal');
-  doc.setTextColor(accentColor[0], accentColor[1], accentColor[2]);
-  doc.text(`- ${formatPDFCurrency(totalSpent)}`, 112, y + 23);
-
-  doc.setFont(font, 'bold');
-  if (balance >= 0) {
-    doc.setTextColor(22, 163, 74); // Green-600
-  } else {
-    doc.setTextColor(accentColor[0], accentColor[1], accentColor[2]);
-  }
-  doc.text('Remaining:', 84, y + 30);
-  doc.text(`${formatPDFCurrency(balance)}`, 112, y + 30);
-
   // Reset colors
   doc.setTextColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
-
-  // 3b. Vector Pie Chart Drawing inside the card (right side)
-  const cx = 142;
-  const cy = y + 19;
-  const r = 10;
-
-  // Pie chart helper function using standard filled triangles
-  const drawSector = (startAngleDeg: number, endAngleDeg: number, fillRgb: number[]) => {
-    const diff = endAngleDeg - startAngleDeg;
-    if (diff <= 0.1) return;
-    
-    if (diff >= 359.9) {
-      doc.setFillColor(fillRgb[0], fillRgb[1], fillRgb[2]);
-      doc.ellipse(cx, cy, r, r, 'F');
-      return;
-    }
-    
-    const startRad = (startAngleDeg * Math.PI) / 180;
-    const endRad = (endAngleDeg * Math.PI) / 180;
-    
-    doc.setFillColor(fillRgb[0], fillRgb[1], fillRgb[2]);
-    const steps = 40;
-    for (let i = 0; i < steps; i++) {
-      const angle1 = startRad + (endRad - startRad) * (i / steps);
-      const angle2 = startRad + (endRad - startRad) * ((i + 1) / steps);
-      
-      const x1 = cx + r * Math.cos(angle1);
-      const y1 = cy + r * Math.sin(angle1);
-      const x2 = cx + r * Math.cos(angle2);
-      const y2 = cy + r * Math.sin(angle2);
-      
-      doc.triangle(cx, cy, x1, y1, x2, y2, 'F');
-    }
-  };
 
   const categoryColors: Record<string, number[]> = {
     'Rent & Housing': [37, 99, 235],         // Blue-600
     'Food & Groceries': [217, 119, 6],       // Amber-600
-    'Bills & Utilities': [79, 70, 229],      // Indigo-600
+    'Bills & Utilities': [234, 88, 12],       // Orange-600
     'Transport & Commute': [8, 145, 178],    // Cyan-600
     'Dining & Entertainment': [225, 29, 72], // Rose-600
     'Investments & Savings': [5, 150, 105],  // Emerald-600
     'Shopping': [147, 51, 234],              // Purple-600
     'Healthcare & Insurance': [220, 38, 38], // Red-600
     'EMI & Loan': [13, 148, 136],             // Teal-600
-    'Other Expenses': [71, 85, 105],         // Slate-600
+    'Subscriptions': [79, 70, 229],          // Indigo-600
+    'Credit Card': [124, 58, 237],           // Violet-600
+    'Other Expenses': [236, 72, 153],        // Pink-600
   };
 
   interface PieSlice {
@@ -446,6 +395,98 @@ export async function exportToPDF(
     });
   }
 
+  // Dynamic card height to perfectly fit the category legend list (4.5mm per category item)
+  // Ensure the card height is tall enough to hold optional income items if present
+  const minCardHeight = 38 + (incentive ? 6 : 0);
+  const cardHeight = Math.max(minCardHeight, 12 + slices.length * 4.5);
+  doc.setFillColor(lightBgColor[0], lightBgColor[1], lightBgColor[2]);
+  doc.rect(14, y, 182, cardHeight, 'F');
+  
+  // Outer frame for the card
+  doc.setDrawColor(226, 232, 240);
+  doc.setLineWidth(0.5);
+  doc.rect(14, y, 182, cardHeight, 'D');
+
+  doc.setFont(font, 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
+  doc.text('LEDGER ACCOUNT SUMMARY', 20, y + 8);
+
+  doc.setFont(font, 'normal');
+  doc.setFontSize(8);
+  doc.text(`Name:                ${user.name}`, 20, y + 18);
+  doc.text(`Statement Period:    ${formatMonthYear(selectedMonth)}`, 20, y + 26);
+
+  // Middle column values (Financial labels and numbers) - drawn dynamically downwards
+  let summaryY = y + 16;
+  doc.setFont(font, 'bold');
+  doc.setFontSize(8);
+  doc.text('Base Salary:', 84, summaryY);
+  doc.setFont(font, 'normal');
+  doc.text(`${formatPDFCurrency(salary)}`, 112, summaryY);
+  summaryY += 6;
+
+  if (incentive) {
+    doc.setFont(font, 'bold');
+    doc.text('Incentive / Bonus:', 84, summaryY);
+    doc.setFont(font, 'normal');
+    doc.text(`+ ${formatPDFCurrency(incentive)}`, 112, summaryY);
+    summaryY += 6;
+  }
+
+  doc.setFont(font, 'bold');
+  doc.text('Total Spent:', 84, summaryY);
+  doc.setFont(font, 'normal');
+  doc.setTextColor(accentColor[0], accentColor[1], accentColor[2]);
+  doc.text(`- ${formatPDFCurrency(totalSpent)}`, 112, summaryY);
+  summaryY += 6;
+
+  doc.setFont(font, 'bold');
+  if (balance >= 0) {
+    doc.setTextColor(22, 163, 74); // Green-600
+  } else {
+    doc.setTextColor(accentColor[0], accentColor[1], accentColor[2]);
+  }
+  doc.text('Remaining:', 84, summaryY);
+  doc.text(`${formatPDFCurrency(balance)}`, 112, summaryY);
+
+  // Reset colors
+  doc.setTextColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
+
+  // 3b. Vector Pie Chart Drawing inside the card (right side)
+  const cx = 138;
+  const cy = y + (cardHeight / 2);
+  const r = 11;
+
+  // Pie chart helper function using standard filled triangles
+  const drawSector = (startAngleDeg: number, endAngleDeg: number, fillRgb: number[]) => {
+    const diff = endAngleDeg - startAngleDeg;
+    if (diff <= 0.1) return;
+    
+    if (diff >= 359.9) {
+      doc.setFillColor(fillRgb[0], fillRgb[1], fillRgb[2]);
+      doc.ellipse(cx, cy, r, r, 'F');
+      return;
+    }
+    
+    const startRad = (startAngleDeg * Math.PI) / 180;
+    const endRad = (endAngleDeg * Math.PI) / 180;
+    
+    doc.setFillColor(fillRgb[0], fillRgb[1], fillRgb[2]);
+    const steps = 40;
+    for (let i = 0; i < steps; i++) {
+      const angle1 = startRad + (endRad - startRad) * (i / steps);
+      const angle2 = startRad + (endRad - startRad) * ((i + 1) / steps);
+      
+      const x1 = cx + r * Math.cos(angle1);
+      const y1 = cy + r * Math.sin(angle1);
+      const x2 = cx + r * Math.cos(angle2);
+      const y2 = cy + r * Math.sin(angle2);
+      
+      doc.triangle(cx, cy, x1, y1, x2, y2, 'F');
+    }
+  };
+
   // Draw slices
   let currentAngle = -90;
   slices.forEach(slice => {
@@ -459,10 +500,11 @@ export async function exportToPDF(
   doc.setLineWidth(0.3);
   doc.ellipse(cx, cy, r, r, 'D');
 
-  // Legend for Pie Chart
-  const legendX = 158;
+  // Legend for Pie Chart (Centered vertically with respect to card height)
+  const legendX = 154;
+  const legendStartY = y + (cardHeight - (slices.length - 1) * 4.5) / 2 + 1;
   slices.forEach((slice, idx) => {
-    const itemY = y + 8 + idx * 7;
+    const itemY = legendStartY + idx * 4.5;
     doc.setFillColor(slice.color[0], slice.color[1], slice.color[2]);
     doc.rect(legendX, itemY - 2.2, 2.5, 2.5, 'F');
     doc.setFont(font, 'normal');
@@ -470,8 +512,8 @@ export async function exportToPDF(
     doc.setTextColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
     
     let displayName = slice.name;
-    if (displayName.length > 18) {
-      displayName = displayName.substring(0, 16) + '..';
+    if (displayName.length > 22) {
+      displayName = displayName.substring(0, 20) + '..';
     }
     doc.text(`${displayName} (${slice.percentage.toFixed(0)}%)`, legendX + 4.5, itemY);
   });
@@ -479,7 +521,7 @@ export async function exportToPDF(
   // Reset colors
   doc.setTextColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
 
-  y += 45;
+  y += cardHeight + 7;
 
   // 4. Detailed Logs Section Header
   doc.setFont(font, 'bold');

@@ -14,6 +14,7 @@ import {
   HelpCircle,
   PieChart,
   Play,
+  CreditCard,
 } from 'lucide-react';
 
 interface ExpenseCategoryListProps {
@@ -36,6 +37,7 @@ export const CATEGORY_META: Record<
   'Healthcare & Insurance': { icon: Activity, color: 'text-red-600', bg: 'bg-red-50', barBg: 'bg-red-600' },
   'EMI & Loan': { icon: Landmark, color: 'text-teal-600', bg: 'bg-teal-50', barBg: 'bg-teal-600' },
   'Subscriptions': { icon: Play, color: 'text-indigo-600', bg: 'bg-indigo-50', barBg: 'bg-indigo-600' },
+  'Credit Card': { icon: CreditCard, color: 'text-violet-600', bg: 'bg-violet-50', barBg: 'bg-violet-600' },
   'Other Expenses': { icon: HelpCircle, color: 'text-pink-600', bg: 'bg-pink-50', barBg: 'bg-pink-600' },
 };
 

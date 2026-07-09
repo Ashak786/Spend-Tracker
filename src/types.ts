@@ -3,6 +3,13 @@ export interface UserProfile {
   name: string;
   salary: number; // monthly salary in INR
   joinedAt: string; // ISO date
+  incentive?: number | null; // optional incentive in INR
+  monthlyIncomes?: {
+    [monthYear: string]: {
+      salary: number;
+      incentive?: number | null;
+    }
+  } | null;
 }
 
 export type CategoryType =
@@ -16,6 +23,7 @@ export type CategoryType =
   | 'Healthcare & Insurance'
   | 'EMI & Loan'
   | 'Subscriptions'
+  | 'Credit Card'
   | 'Other Expenses';
 
 export interface CategoryBudget {
