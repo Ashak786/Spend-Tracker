@@ -421,24 +421,24 @@ export async function exportToPDF(
   let summaryY = y + 16;
   doc.setFont(font, 'bold');
   doc.setFontSize(8);
-  doc.text('Base Salary:', 84, summaryY);
+  doc.text('Base Salary:', 72, summaryY);
   doc.setFont(font, 'normal');
-  doc.text(`${formatPDFCurrency(salary)}`, 112, summaryY);
+  doc.text(`${formatPDFCurrency(salary)}`, 120, summaryY, { align: 'right' });
   summaryY += 6;
 
   if (incentive) {
     doc.setFont(font, 'bold');
-    doc.text('Incentive / Bonus:', 84, summaryY);
+    doc.text('Incentive / Bonus:', 72, summaryY);
     doc.setFont(font, 'normal');
-    doc.text(`+ ${formatPDFCurrency(incentive)}`, 112, summaryY);
+    doc.text(`+ ${formatPDFCurrency(incentive)}`, 120, summaryY, { align: 'right' });
     summaryY += 6;
   }
 
   doc.setFont(font, 'bold');
-  doc.text('Total Spent:', 84, summaryY);
+  doc.text('Total Spent:', 72, summaryY);
   doc.setFont(font, 'normal');
   doc.setTextColor(accentColor[0], accentColor[1], accentColor[2]);
-  doc.text(`- ${formatPDFCurrency(totalSpent)}`, 112, summaryY);
+  doc.text(`- ${formatPDFCurrency(totalSpent)}`, 120, summaryY, { align: 'right' });
   summaryY += 6;
 
   doc.setFont(font, 'bold');
@@ -447,14 +447,14 @@ export async function exportToPDF(
   } else {
     doc.setTextColor(accentColor[0], accentColor[1], accentColor[2]);
   }
-  doc.text('Remaining:', 84, summaryY);
-  doc.text(`${formatPDFCurrency(balance)}`, 112, summaryY);
+  doc.text('Remaining:', 72, summaryY);
+  doc.text(`${formatPDFCurrency(balance)}`, 120, summaryY, { align: 'right' });
 
   // Reset colors
   doc.setTextColor(secondaryColor[0], secondaryColor[1], secondaryColor[2]);
 
   // 3b. Vector Pie Chart Drawing inside the card (right side)
-  const cx = 138;
+  const cx = 134;
   const cy = y + (cardHeight / 2);
   const r = 11;
 
@@ -501,7 +501,7 @@ export async function exportToPDF(
   doc.ellipse(cx, cy, r, r, 'D');
 
   // Legend for Pie Chart (Centered vertically with respect to card height)
-  const legendX = 154;
+  const legendX = 148;
   const legendStartY = y + (cardHeight - (slices.length - 1) * 4.5) / 2 + 1;
   slices.forEach((slice, idx) => {
     const itemY = legendStartY + idx * 4.5;
@@ -515,7 +515,8 @@ export async function exportToPDF(
     if (displayName.length > 22) {
       displayName = displayName.substring(0, 20) + '..';
     }
-    doc.text(`${displayName} (${slice.percentage.toFixed(0)}%)`, legendX + 4.5, itemY);
+    const pctStr = slice.percentage < 1 && slice.percentage > 0 ? slice.percentage.toFixed(1) : slice.percentage.toFixed(0);
+    doc.text(`${displayName} (${pctStr}%)`, legendX + 4.5, itemY);
   });
 
   // Reset colors
@@ -540,7 +541,7 @@ export async function exportToPDF(
   doc.text('Date', 18, y + 5.5);
   doc.text('Category', 40, y + 5.5);
   doc.text('Expense Item / Description', 78, y + 5.5);
-  doc.text('Amount (INR)', 162, y + 5.5);
+  doc.text('Amount (INR)', 190, y + 5.5, { align: 'right' });
 
   y += 8;
 
@@ -568,7 +569,7 @@ export async function exportToPDF(
         doc.text('Date', 18, y + 5.5);
         doc.text('Category', 40, y + 5.5);
         doc.text('Expense Item / Description', 78, y + 5.5);
-        doc.text('Amount (INR)', 162, y + 5.5);
+        doc.text('Amount (INR)', 190, y + 5.5, { align: 'right' });
         
         y += 8;
         doc.setFont(font, 'normal');
@@ -598,7 +599,7 @@ export async function exportToPDF(
 
       // Numeric values right aligned relatively
       doc.setFont(font, 'bold');
-      doc.text(formatPDFCurrency(t.amount), 162, y + 5.5);
+      doc.text(formatPDFCurrency(t.amount), 190, y + 5.5, { align: 'right' });
 
       y += 8;
     });
