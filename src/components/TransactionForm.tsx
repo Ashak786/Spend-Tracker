@@ -118,6 +118,7 @@ export default function TransactionForm({
             <span className="absolute left-4 top-2.5 text-slate-400 text-sm font-black">₹</span>
             <input
               type="text"
+              inputMode="decimal"
               required
               value={amount}
               onChange={e => setAmount(e.target.value)}

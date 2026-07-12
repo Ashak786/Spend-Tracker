@@ -78,8 +78,12 @@ async function testConnection() {
   try {
     await getDocFromServer(doc(db, 'test', 'connection'));
   } catch (error) {
-    if (error instanceof Error && error.message.includes('the client is offline')) {
-      console.error("Please check your Firebase configuration.");
+    if (error instanceof Error) {
+      if (error.message.includes('the client is offline') || error.message.includes('unavailable')) {
+        console.warn("Firestore is running in offline mode. Local operations will be cached and synced later.");
+      } else {
+        console.warn("Firestore connection check failed. If you see authorization errors, please check your Firebase configuration:", error.message);
+      }
     }
   }
 }

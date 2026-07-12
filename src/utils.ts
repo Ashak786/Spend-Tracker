@@ -1,5 +1,4 @@
 import { Transaction, UserProfile } from './types';
-import { jsPDF } from 'jspdf';
 
 /**
  * Formats a number to Indian Rupee currency format (e.g., ₹1,50,000).
@@ -86,7 +85,7 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
   return window.btoa(binary);
 }
 
-async function loadPoppinsFonts(doc: jsPDF): Promise<boolean> {
+async function loadPoppinsFonts(doc: any): Promise<boolean> {
   try {
     const regularUrl = 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/poppins/Poppins-Regular.ttf';
     const boldUrl = 'https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/poppins/Poppins-Bold.ttf';
@@ -273,6 +272,9 @@ export async function exportToPDF(
   const { salary, incentive } = getMonthlyIncomeDetails(user, selectedMonth);
   const effectiveSalary = salary + (incentive || 0);
   const balance = effectiveSalary - totalSpent;
+
+  // Dynamic import jsPDF to reduce initial bundle size and speed up site load
+  const { jsPDF } = await import('jspdf');
 
   // Initialize jsPDF document (standard A4, vertical, mm)
   const doc = new jsPDF({
