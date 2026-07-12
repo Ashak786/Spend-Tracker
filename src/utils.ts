@@ -263,10 +263,10 @@ export async function exportToPDF(
   transactions: Transaction[],
   selectedMonth: string // YYYY-MM
 ) {
-  // Filter transactions for the selected month and sort in ascending chronological order (Small to big)
+  // Filter transactions for the selected month and sort in descending chronological order (Big to small)
   const filtered = transactions
     .filter(t => t.date.startsWith(selectedMonth))
-    .sort((a, b) => a.date.localeCompare(b.date));
+    .sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
   const totalSpent = filtered.reduce((sum, t) => sum + t.amount, 0);
   
   const { salary, incentive } = getMonthlyIncomeDetails(user, selectedMonth);

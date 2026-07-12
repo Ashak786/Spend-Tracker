@@ -43,6 +43,7 @@ export default function UserProfileManager({
 
   // State to track profile ID that is currently in 'confirm-delete' state
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,13 +117,38 @@ export default function UserProfileManager({
         </div>
         
         {!isAdding && (
-          <button
-            onClick={() => setIsAdding(true)}
-            className="self-start sm:self-auto inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-2xl transition-transform hover:scale-105 shadow-md cursor-pointer"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            Add New User
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                if (isEditMode) { setIsEditing(false); setEditError(null); }
+                setIsEditMode(!isEditMode);
+              }}
+              className={`inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold rounded-2xl transition-all border-2 shadow-sm ${
+                isEditMode
+                  ? 'text-amber-700 bg-amber-50 border-amber-200 hover:bg-amber-100'
+                  : 'text-slate-600 bg-slate-50 border-slate-200 hover:bg-slate-100'
+              }`}
+            >
+              {isEditMode ? (
+                <>
+                  <Check className="w-3.5 h-3.5" />
+                  Done Editing
+                </>
+              ) : (
+                <>
+                  <Edit2 className="w-3.5 h-3.5" />
+                  Edit Users
+                </>
+              )}
+            </button>
+            <button
+              onClick={() => setIsAdding(true)}
+              className="inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-2xl transition-transform hover:scale-105 shadow-md cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Add New User
+            </button>
+          </div>
         )}
       </div>
 
@@ -297,74 +323,76 @@ export default function UserProfileManager({
                 )}
 
                 {/* Edit Controls */}
-                <div className="flex gap-1">
-                  {isSelected && (
-                    <>
-                      {isEditing ? (
-                        <div className="flex gap-1 absolute top-3 right-3 bg-white/95 shadow-md border-2 border-slate-200 rounded-xl p-0.5">
+                {isEditMode && (
+                  <div className="flex gap-1">
+                    {isSelected && (
+                      <>
+                        {isEditing ? (
+                          <div className="flex gap-1 absolute top-3 right-3 bg-white/95 shadow-md border-2 border-slate-200 rounded-xl p-0.5">
+                            <button
+                              onClick={handleSaveEdit}
+                              title="Save Changes"
+                              className="p-1 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+                            >
+                              <Check className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => {
+                                setIsEditing(false);
+                                setEditError(null);
+                              }}
+                              title="Cancel"
+                              className="p-1 text-slate-400 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ) : (
                           <button
-                            onClick={handleSaveEdit}
-                            title="Save Changes"
-                            className="p-1 text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+                            onClick={handleStartEdit}
+                            title="Edit Profile"
+                            className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
                           >
-                            <Check className="w-3.5 h-3.5" />
+                            <Edit2 className="w-3.5 h-3.5" />
                           </button>
+                        )}
+                      </>
+                    )}
+                    
+                    {/* Delete (only show for non-selected users or if there is > 1 user) */}
+                    {users.length > 1 && !isEditing && (
+                      deletingId === u.id ? (
+                        <div className="flex items-center gap-1 bg-rose-50 border border-rose-200 rounded-lg p-0.5 animate-fade-in shrink-0">
                           <button
                             onClick={() => {
-                              setIsEditing(false);
-                              setEditError(null);
+                              onDeleteUser(u.id);
+                              setDeletingId(null);
                             }}
-                            title="Cancel"
-                            className="p-1 text-slate-400 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                            className="p-1 text-rose-600 hover:bg-rose-100 rounded-md transition-colors cursor-pointer"
+                            title="Confirm Delete"
                           >
-                            <X className="w-3.5 h-3.5" />
+                            <Check className="w-3 h-3 font-bold" />
+                          </button>
+                          <button
+                            onClick={() => setDeletingId(null)}
+                            className="p-1 text-slate-400 hover:bg-slate-100 rounded-md transition-colors cursor-pointer"
+                            title="Cancel"
+                          >
+                            <X className="w-3 h-3" />
                           </button>
                         </div>
                       ) : (
                         <button
-                          onClick={handleStartEdit}
-                          title="Edit Profile"
-                          className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                          onClick={() => setDeletingId(u.id)}
+                          title="Delete Profile"
+                          className="p-1 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
                         >
-                          <Edit2 className="w-3.5 h-3.5" />
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
-                      )}
-                    </>
-                  )}
-                  
-                  {/* Delete (only show for non-selected users or if there is > 1 user) */}
-                  {users.length > 1 && !isEditing && (
-                    deletingId === u.id ? (
-                      <div className="flex items-center gap-1 bg-rose-50 border border-rose-200 rounded-lg p-0.5 animate-fade-in shrink-0">
-                        <button
-                          onClick={() => {
-                            onDeleteUser(u.id);
-                            setDeletingId(null);
-                          }}
-                          className="p-1 text-rose-600 hover:bg-rose-100 rounded-md transition-colors cursor-pointer"
-                          title="Confirm Delete"
-                        >
-                          <Check className="w-3 h-3 font-bold" />
-                        </button>
-                        <button
-                          onClick={() => setDeletingId(null)}
-                          className="p-1 text-slate-400 hover:bg-slate-100 rounded-md transition-colors cursor-pointer"
-                          title="Cancel"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => setDeletingId(u.id)}
-                        title="Delete Profile"
-                        className="p-1 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    )
-                  )}
-                </div>
+                      )
+                    )}
+                  </div>
+                )}
               </div>
 
               {!isEditing || !isSelected ? (

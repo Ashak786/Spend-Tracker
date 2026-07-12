@@ -111,19 +111,21 @@ export default function TransactionList({
           </p>
         </div>
 
-        {/* Export Button */}
-        <button
-          id="export-pdf-btn"
-          onClick={handleExport}
-          disabled={monthlyTransactions.length === 0 || isExporting}
-          className={`inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-bold rounded-2xl transition-all border-2 shadow-sm cursor-pointer w-full sm:w-auto ${
-            isExporting
-              ? 'text-teal-400 bg-teal-50/50 border-teal-100 cursor-wait'
-              : monthlyTransactions.length > 0
-              ? 'text-teal-700 bg-teal-50 border-teal-200 hover:bg-teal-100 hover:scale-105 active:scale-95'
-              : 'text-slate-400 bg-slate-50 border-slate-200 cursor-not-allowed opacity-50'
-          }`}
-        >
+        {/* Action Buttons: Export */}
+        <div className="flex items-center gap-2">
+          
+          <button
+            id="export-pdf-btn"
+            onClick={handleExport}
+            disabled={monthlyTransactions.length === 0 || isExporting}
+            className={`inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-bold rounded-2xl transition-all border-2 shadow-sm cursor-pointer w-full sm:w-auto ${
+              isExporting
+                ? 'text-teal-400 bg-teal-50/50 border-teal-100 cursor-wait'
+                : monthlyTransactions.length > 0
+                ? 'text-teal-700 bg-teal-50 border-teal-200 hover:bg-teal-100 hover:scale-105 active:scale-95'
+                : 'text-slate-400 bg-slate-50 border-slate-200 cursor-not-allowed opacity-50'
+            }`}
+          >
           {isExporting ? (
             <>
               <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-teal-600" fill="none" viewBox="0 0 24 24">
@@ -140,8 +142,9 @@ export default function TransactionList({
           )}
         </button>
       </div>
+    </div>
 
-      {/* Search and Filters */}
+    {/* Search and Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         {/* Search Input */}
         <div className="relative flex-1">
@@ -310,7 +313,7 @@ export default function TransactionList({
 
             {/* Modal Body / Form */}
             <form
-              onSubmit={(e) => {
+              onSubmit={async (e) => {
                 e.preventDefault();
                 if (!editTitle.trim() || !editAmount) return;
                 
@@ -319,7 +322,7 @@ export default function TransactionList({
                 
                 if (isNaN(parsedAmount) || parsedAmount <= 0) return;
                 
-                onUpdateTransaction({
+                await onUpdateTransaction({
                   ...editingTx,
                   title: editTitle.trim(),
                   amount: Number(parsedAmount.toFixed(2)),
