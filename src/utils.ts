@@ -318,13 +318,13 @@ export async function exportToPDF(
   doc.setTextColor(255, 255, 255);
   doc.setFont(font, 'bold');
   doc.setFontSize(20);
-  doc.text('Spend Wisely', 39, 21);
+  doc.text('SPEND WISELY', 39, 21);
 
   // Subtitle
   doc.setFont(font, 'normal');
   doc.setFontSize(7.5);
   doc.setTextColor(204, 251, 241); // Light Teal-100 text
-  doc.text('SPEND TRACKER STATEMENT', 39, 27);
+  doc.text('SPEND TRACKER', 39, 27);
 
   // 2. Right Aligned Metadata in Banner
   doc.setFont(font, 'bold');

@@ -20,7 +20,8 @@ const app = initializeApp(firebaseConfig);
 
 // Initialize Firestore Database with custom database ID and ignoreUndefinedProperties
 export const db = initializeFirestore(app, {
-  ignoreUndefinedProperties: true
+  ignoreUndefinedProperties: true,
+  experimentalForceLongPolling: true
 }, firebaseConfig.firestoreDatabaseId || 'default');
 
 // Define Collections
