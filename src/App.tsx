@@ -517,6 +517,7 @@ export default function App() {
                     <TransactionForm
                       userId={currentUser.id}
                       onAddTransaction={handleAddTransaction}
+                      onSuccess={() => setIsMobileFormOpen(false)}
                       selectedMonth={selectedMonth}
                       isModal={true}
                     />

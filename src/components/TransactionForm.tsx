@@ -7,6 +7,7 @@ import { formatCurrency } from '../utils';
 interface TransactionFormProps {
   userId: string;
   onAddTransaction: (transaction: Omit<Transaction, 'id'>) => void;
+  onSuccess?: () => void;
   selectedMonth: string; // fallback to prefill date month
   isModal?: boolean;
 }
@@ -14,6 +15,7 @@ interface TransactionFormProps {
 export default function TransactionForm({
   userId,
   onAddTransaction,
+  onSuccess,
   selectedMonth,
   isModal = false,
 }: TransactionFormProps) {
@@ -79,6 +81,8 @@ export default function TransactionForm({
       date,
       description: description.trim() || undefined,
     });
+
+    onSuccess?.();
 
     // Reset fields (preserve date and category for convenient batch entry)
     setTitle('');
