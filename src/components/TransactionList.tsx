@@ -64,12 +64,6 @@ export default function TransactionList({
   const isEquation = /[\+\-\*\/]/.test(editAmount);
   const evaluatedAmount = evaluateMath(editAmount);
 
-  const handleEditAmountBlur = () => {
-    if (isEquation && evaluatedAmount !== null) {
-      setEditAmount(Number(evaluatedAmount.toFixed(2)).toString());
-    }
-  };
-
   // Filter transactions by current month, search query, and category
   const monthlyTransactions = transactions.filter(t => t.date.startsWith(selectedMonth));
   
@@ -366,7 +360,6 @@ export default function TransactionList({
                       required
                       value={editAmount}
                       onChange={(e) => setEditAmount(e.target.value)}
-                      onBlur={handleEditAmountBlur}
                       placeholder="0.00 (or e.g. 150+45)"
                       className="w-full text-sm pl-8 pr-4 py-2.5 border-2 border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white font-bold text-slate-800"
                     />
