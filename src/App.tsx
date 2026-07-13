@@ -266,10 +266,10 @@ export default function App() {
   return (
     <div className="min-h-screen relative overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans selection:bg-blue-50 dark:selection:bg-blue-950/40 selection:text-blue-900 transition-colors duration-300">
       {/* Beautiful ambient glowing spots for Glassmorphism matching the brand palette */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] max-w-[600px] rounded-full bg-blue-300/20 dark:bg-blue-500/5 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[10%] right-[-10%] w-[60vw] h-[60vw] max-w-[700px] rounded-full bg-orange-300/15 dark:bg-orange-500/5 blur-[150px] pointer-events-none" />
-      <div className="absolute top-[45%] right-[15%] w-[35vw] h-[35vw] max-w-[500px] rounded-full bg-blue-200/15 dark:bg-blue-500/5 blur-[100px] pointer-events-none" />
-      <div className="absolute top-[15%] left-[40%] w-[40vw] h-[40vw] max-w-[550px] rounded-full bg-orange-200/15 dark:bg-orange-500/5 blur-[120px] pointer-events-none" />
+      <div className="hidden md:block absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] max-w-[600px] rounded-full bg-blue-300/20 dark:bg-blue-500/5 blur-[120px] pointer-events-none" />
+      <div className="hidden md:block absolute bottom-[10%] right-[-10%] w-[60vw] h-[60vw] max-w-[700px] rounded-full bg-orange-300/15 dark:bg-orange-500/5 blur-[150px] pointer-events-none" />
+      <div className="hidden md:block absolute top-[45%] right-[15%] w-[35vw] h-[35vw] max-w-[500px] rounded-full bg-blue-200/15 dark:bg-blue-500/5 blur-[100px] pointer-events-none" />
+      <div className="hidden md:block absolute top-[15%] left-[40%] w-[40vw] h-[40vw] max-w-[550px] rounded-full bg-orange-200/15 dark:bg-orange-500/5 blur-[120px] pointer-events-none" />
 
       {/* Top Banner Accent with Spend Wisely deep blue to orange gradient */}
       <div className="h-1.5 w-full bg-gradient-to-r from-blue-700 via-orange-500 to-blue-800 relative z-10 animate-pulse" />
@@ -278,14 +278,14 @@ export default function App() {
       <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-4 sm:space-y-6 relative z-10">
         
         {/* Header section as a Bento Card with elevated branding & profile status */}
-        <header className="bg-white/50 dark:bg-slate-900/40 backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-4 sm:p-5 shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300 hover:border-white/95 dark:hover:border-white/15">
+        <header className="bg-white dark:bg-slate-900 md:bg-white/50 md:dark:bg-slate-900/40 backdrop-blur-none md:backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-4 sm:p-5 shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300 hover:border-white/95 dark:hover:border-white/15">
           <div className="flex items-center justify-between gap-4 w-full">
             <div className="flex items-center gap-3">
               <LogoFull size={48} />
             </div>
 
             {currentUser && (
-              <div className="flex items-center gap-2 sm:gap-3 bg-white/40 dark:bg-slate-950/20 px-3.5 py-2 rounded-2xl border border-white/60 dark:border-white/5 backdrop-blur-xs shadow-xs">
+              <div className="flex items-center gap-2 sm:gap-3 bg-white/40 dark:bg-slate-950/20 px-3.5 py-2 rounded-2xl border border-white/60 dark:border-white/5 shadow-xs">
                 <img
                   src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(currentUser.name)}`}
                   alt={currentUser.name}
@@ -301,7 +301,7 @@ export default function App() {
         </header>
 
         {loading ? (
-          <div className="bg-white/50 dark:bg-slate-900/40 backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-6 sm:p-12 text-center shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] max-w-sm mx-auto space-y-4 my-6 sm:my-12">
+          <div className="bg-white dark:bg-slate-900 md:bg-white/50 md:dark:bg-slate-900/40 backdrop-blur-none md:backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-6 sm:p-12 text-center shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] max-w-sm mx-auto space-y-4 my-6 sm:my-12">
             <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border-2 border-blue-100 dark:border-blue-900/40 flex items-center justify-center mx-auto text-blue-600 dark:text-blue-400 animate-spin">
               <Sparkles className="w-6 h-6" />
             </div>
@@ -310,7 +310,7 @@ export default function App() {
             </p>
           </div>
         ) : currentUser === null ? (
-          <div className="bg-white/50 dark:bg-slate-900/40 backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-5 sm:p-8 shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] max-w-xl mx-auto text-center space-y-4 sm:space-y-6 my-6 sm:my-12">
+          <div className="bg-white dark:bg-slate-900 md:bg-white/50 md:dark:bg-slate-900/40 backdrop-blur-none md:backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-5 sm:p-8 shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] max-w-xl mx-auto text-center space-y-4 sm:space-y-6 my-6 sm:my-12">
             <div className="w-16 h-16 rounded-[24px] bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center text-blue-600 dark:text-blue-400 mx-auto border-2 border-blue-100 dark:border-blue-900/40 shadow-sm animate-pulse">
               <IndianRupee className="w-8 h-8 font-black text-orange-500" />
             </div>
@@ -352,7 +352,7 @@ export default function App() {
                   type="text"
                   required
                   placeholder="e.g. Ramesh Kumar"
-                  className="w-full text-sm px-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/40 dark:bg-slate-900/20 backdrop-blur-xs font-bold text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
+                  className="w-full text-sm px-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 font-bold text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
                 />
               </div>
 
@@ -367,7 +367,7 @@ export default function App() {
                     type="number"
                     required
                     placeholder="e.g. 75000"
-                    className="w-full text-sm pl-8 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/40 dark:bg-slate-900/20 backdrop-blur-xs font-bold text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
+                    className="w-full text-sm pl-8 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 font-bold text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
                   />
                 </div>
                 <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-semibold">
@@ -386,7 +386,7 @@ export default function App() {
                     type="number"
                     min="0"
                     placeholder="e.g. 5000"
-                    className="w-full text-sm pl-8 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/40 dark:bg-slate-900/20 backdrop-blur-xs font-bold text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
+                    className="w-full text-sm pl-8 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 font-bold text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
                   />
                 </div>
               </div>
@@ -462,7 +462,7 @@ export default function App() {
         )}
 
         {/* Footer */}
-        <footer className="bg-white/40 dark:bg-slate-900/30 backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-4 sm:p-6 shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] mt-4 sm:mt-6">
+        <footer className="bg-white dark:bg-slate-900 md:bg-white/40 md:dark:bg-slate-900/30 backdrop-blur-none md:backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-4 sm:p-6 shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] mt-4 sm:mt-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-left space-y-1">
               <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px]">

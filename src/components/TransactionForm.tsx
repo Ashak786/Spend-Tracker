@@ -104,7 +104,7 @@ export default function TransactionForm({
             value={title}
             onChange={e => setTitle(e.target.value)}
             placeholder="e.g. Jio Fiber Bill, Swiggy Dinner"
-            className="w-full text-sm px-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/40 dark:bg-slate-900/30 backdrop-blur-xs font-bold text-slate-800 dark:text-slate-200 focus:bg-white/90 dark:focus:bg-slate-900/90 transition-all duration-200"
+            className="w-full text-sm px-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 font-bold text-slate-800 dark:text-slate-200 focus:bg-white/90 dark:focus:bg-slate-900/90 transition-all duration-200"
           />
         </div>
       </div>
@@ -128,7 +128,7 @@ export default function TransactionForm({
               onChange={e => setAmount(e.target.value)}
               onBlur={handleAmountBlur}
               placeholder="0.00 (or e.g. 150+45)"
-              className="w-full text-sm pl-8 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/40 dark:bg-slate-900/30 backdrop-blur-xs font-bold text-slate-800 dark:text-slate-200 focus:bg-white/90 dark:focus:bg-slate-900/90 transition-all duration-200"
+              className="w-full text-sm pl-8 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 font-bold text-slate-800 dark:text-slate-200 focus:bg-white/90 dark:focus:bg-slate-900/90 transition-all duration-200"
             />
           </div>
           {isEquation && (
@@ -153,7 +153,7 @@ export default function TransactionForm({
           <select
             value={category}
             onChange={e => setCategory(e.target.value as CategoryType)}
-            className="w-full text-sm px-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/40 dark:bg-slate-900/30 backdrop-blur-xs cursor-pointer font-bold text-slate-800 dark:text-slate-200 focus:bg-white/90 dark:focus:bg-slate-900/90 transition-all duration-200"
+            className="w-full text-sm px-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 cursor-pointer font-bold text-slate-800 dark:text-slate-200 focus:bg-white/90 dark:focus:bg-slate-900/90 transition-all duration-200"
           >
             {Object.keys(CATEGORY_META).map(catKey => (
               <option key={catKey} value={catKey}>
@@ -175,7 +175,7 @@ export default function TransactionForm({
             required
             value={date}
             onChange={e => setDate(e.target.value)}
-            className="w-full text-sm px-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/40 dark:bg-slate-900/30 backdrop-blur-xs cursor-pointer font-bold text-slate-800 dark:text-slate-200 focus:bg-white/90 dark:focus:bg-slate-900/90 transition-all duration-200"
+            className="w-full text-sm px-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 cursor-pointer font-bold text-slate-800 dark:text-slate-200 focus:bg-white/90 dark:focus:bg-slate-900/90 transition-all duration-200"
           />
         </div>
 
@@ -188,7 +188,7 @@ export default function TransactionForm({
             value={description}
             onChange={e => setDescription(e.target.value)}
             placeholder="e.g. Paid via UPI"
-            className="w-full text-sm px-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/40 dark:bg-slate-900/30 backdrop-blur-xs font-bold text-slate-800 dark:text-slate-200 focus:bg-white/90 dark:focus:bg-slate-900/90 transition-all duration-200"
+            className="w-full text-sm px-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 font-bold text-slate-800 dark:text-slate-200 focus:bg-white/90 dark:focus:bg-slate-900/90 transition-all duration-200"
           />
         </div>
       </div>
@@ -208,7 +208,7 @@ export default function TransactionForm({
   }
 
   return (
-    <div className="bg-white/50 dark:bg-slate-900/40 backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-4 sm:p-6 shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:shadow-[0_12px_36px_rgba(15,23,42,0.08)] dark:hover:shadow-[0_12px_36px_rgba(0,0,0,0.4)] transition-all duration-300">
+    <div className="bg-white dark:bg-slate-900 md:bg-white/50 md:dark:bg-slate-900/40 backdrop-blur-none md:backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-4 sm:p-6 shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:shadow-[0_12px_36px_rgba(15,23,42,0.08)] dark:hover:shadow-[0_12px_36px_rgba(0,0,0,0.4)] transition-all duration-300">
       <div className="flex items-center gap-2 mb-5">
         <PlusCircle className="w-4 h-4 text-blue-600 dark:text-blue-400 animate-pulse" />
         <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">

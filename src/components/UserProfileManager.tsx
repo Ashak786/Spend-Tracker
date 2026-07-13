@@ -190,7 +190,7 @@ export default function UserProfileManager({
   };
 
   return (
-    <div className="bg-white/50 dark:bg-slate-900/40 backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-4 sm:p-6 shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300 hover:border-white/90 dark:hover:border-white/20">
+    <div className="bg-white dark:bg-slate-900 md:bg-white/50 md:dark:bg-slate-900/40 backdrop-blur-none md:backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-4 sm:p-6 shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300 hover:border-white/90 dark:hover:border-white/20">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 flex items-center gap-2">
@@ -240,7 +240,7 @@ export default function UserProfileManager({
 
       {/* Adding profile form */}
       {isAdding && (
-        <form onSubmit={handleCreate} className="bg-white/30 dark:bg-slate-900/20 backdrop-blur-md border border-white/40 dark:border-white/10 rounded-2xl p-5 mb-6 shadow-inner">
+        <form onSubmit={handleCreate} className="bg-slate-50 dark:bg-slate-950 md:bg-white/30 md:dark:bg-slate-900/20 backdrop-blur-none md:backdrop-blur-md border border-slate-200/50 dark:border-white/10 rounded-2xl p-5 mb-6 shadow-inner">
           <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 mb-4 uppercase tracking-widest">
             Create Profile
           </h3>
@@ -258,7 +258,7 @@ export default function UserProfileManager({
                   if (addError) setAddError(null);
                 }}
                 placeholder="e.g. Ramesh Kumar"
-                className="w-full text-sm px-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/40 dark:bg-slate-900/20 backdrop-blur-xs text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
+                className="w-full text-sm px-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
               />
             </div>
             <div>
@@ -274,7 +274,7 @@ export default function UserProfileManager({
                   value={newSalary}
                   onChange={e => setNewSalary(e.target.value)}
                   placeholder="e.g. 75000"
-                  className="w-full text-sm pl-8 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/40 dark:bg-slate-900/20 backdrop-blur-xs font-bold text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
+                  className="w-full text-sm pl-8 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 font-bold text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
                 />
               </div>
             </div>
@@ -290,7 +290,7 @@ export default function UserProfileManager({
                   value={newIncentive}
                   onChange={e => setNewIncentive(e.target.value)}
                   placeholder="e.g. 5000"
-                  className="w-full text-sm pl-8 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/40 dark:bg-slate-900/20 backdrop-blur-xs font-bold text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
+                  className="w-full text-sm pl-8 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 font-bold text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
                 />
               </div>
             </div>
@@ -298,7 +298,7 @@ export default function UserProfileManager({
               <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
                 Profile Photo (Optional)
               </label>
-              <div className="flex items-center gap-4 bg-white/40 dark:bg-slate-900/20 backdrop-blur-xs p-3 border border-slate-200/60 dark:border-white/10 rounded-2xl">
+              <div className="flex items-center gap-4 bg-slate-100 dark:bg-slate-900/60 p-3 border border-slate-200/60 dark:border-white/10 rounded-2xl">
                 <div className="relative w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden flex items-center justify-center shrink-0">
                   {newPhoto ? (
                     <img src={newPhoto} alt="New profile preview" className="w-full h-full object-cover" />
@@ -365,8 +365,8 @@ export default function UserProfileManager({
               key={u.id}
               className={`relative rounded-2xl sm:rounded-3xl border transition-all flex flex-col justify-between p-4 sm:p-5 ${
                 isSelected
-                  ? 'border-blue-500/80 dark:border-blue-500/50 bg-blue-50/50 dark:bg-blue-950/20 shadow-md scale-[1.02] backdrop-blur-sm'
-                  : 'border-white/50 dark:border-white/10 bg-white/30 dark:bg-slate-900/20 backdrop-blur-xs opacity-80 hover:opacity-100 hover:bg-white/50 dark:hover:bg-slate-900/40 hover:shadow-xs'
+                  ? 'border-blue-500/80 dark:border-blue-500/50 bg-blue-50 dark:bg-blue-950/40 md:bg-blue-50/50 md:dark:bg-blue-950/20 shadow-md scale-[1.02] backdrop-blur-none md:backdrop-blur-sm'
+                  : 'border-white/50 dark:border-white/10 bg-white dark:bg-slate-900 md:bg-white/30 md:dark:bg-slate-900/20 backdrop-blur-none md:backdrop-blur-xs opacity-80 hover:opacity-100 hover:bg-white/50 dark:hover:bg-slate-900/40 hover:shadow-xs'
               }`}
             >
               <div className="flex justify-between items-start mb-3 gap-3">

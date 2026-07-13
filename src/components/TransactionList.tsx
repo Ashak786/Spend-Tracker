@@ -92,7 +92,7 @@ export default function TransactionList({
   };
 
   return (
-    <div className="bg-white/50 dark:bg-slate-900/40 backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-4 sm:p-6 space-y-4 sm:space-y-5 shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:shadow-[0_12px_36px_rgba(15,23,42,0.08)] dark:hover:shadow-[0_12px_36px_rgba(0,0,0,0.4)] transition-all duration-300">
+    <div className="bg-white dark:bg-slate-900 md:bg-white/50 md:dark:bg-slate-900/40 backdrop-blur-none md:backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-4 sm:p-6 space-y-4 sm:space-y-5 shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:shadow-[0_12px_36px_rgba(15,23,42,0.08)] dark:hover:shadow-[0_12px_36px_rgba(0,0,0,0.4)] transition-all duration-300">
       {/* List Header and Export Button */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         <div>
@@ -150,7 +150,7 @@ export default function TransactionList({
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search items, notes..."
-            className="w-full text-xs pl-10 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white/40 dark:bg-slate-900/30 backdrop-blur-xs font-bold text-slate-800 dark:text-slate-200 focus:bg-white/90 dark:focus:bg-slate-900/90 transition-all duration-200"
+            className="w-full text-xs pl-10 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-100 dark:bg-slate-900/60 font-bold text-slate-800 dark:text-slate-200 focus:bg-white/90 dark:focus:bg-slate-900/90 transition-all duration-200"
           />
         </div>
 
@@ -162,7 +162,7 @@ export default function TransactionList({
           <select
             value={selectedCategoryFilter}
             onChange={e => setSelectedCategoryFilter(e.target.value)}
-            className="w-full sm:w-auto text-xs pl-9 pr-9 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl bg-white/40 dark:bg-slate-900/30 backdrop-blur-xs focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer font-bold text-slate-800 dark:text-slate-200 focus:bg-white/90 dark:focus:bg-slate-900/90 transition-all duration-200"
+            className="w-full sm:w-auto text-xs pl-9 pr-9 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl bg-slate-100 dark:bg-slate-900/60 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer font-bold text-slate-800 dark:text-slate-200 focus:bg-white/90 dark:focus:bg-slate-900/90 transition-all duration-200"
           >
             <option value="All">All Categories</option>
             {Object.keys(CATEGORY_META).map(cat => (
@@ -177,7 +177,7 @@ export default function TransactionList({
       {/* Table / List Container */}
       <div className="overflow-x-auto">
         {filteredTransactions.length === 0 ? (
-          <div className="text-center py-12 border border-dashed border-slate-300 dark:border-slate-800 rounded-3xl flex flex-col items-center justify-center space-y-2 bg-white/20 dark:bg-slate-900/20 backdrop-blur-xs">
+          <div className="text-center py-12 border border-dashed border-slate-300 dark:border-slate-800 rounded-3xl flex flex-col items-center justify-center space-y-2 bg-slate-50 dark:bg-slate-950/40">
             <Inbox className="w-8 h-8 text-slate-300 dark:text-slate-700" />
             <p className="text-xs text-slate-400 dark:text-slate-500 font-semibold">No matching transactions logged.</p>
           </div>
@@ -194,11 +194,11 @@ export default function TransactionList({
               return (
                 <div
                   key={t.id}
-                  className="group flex items-center justify-between p-3 sm:p-4 rounded-2xl border border-white/60 dark:border-white/10 bg-white/30 dark:bg-slate-900/30 backdrop-blur-xs hover:border-blue-300 dark:hover:border-blue-500/40 hover:bg-white/60 dark:hover:bg-slate-900/60 hover:shadow-sm dark:hover:shadow-lg transition-all gap-2 sm:gap-4 shadow-[0_2px_12px_rgba(15,23,42,0.02)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.15)]"
+                  className="group flex items-center justify-between p-3 sm:p-4 rounded-2xl border border-white/60 dark:border-white/10 bg-white dark:bg-slate-950/40 md:bg-white/30 md:dark:bg-slate-900/30 backdrop-blur-none md:backdrop-blur-xs hover:border-blue-300 dark:hover:border-blue-500/40 hover:bg-slate-50 dark:hover:bg-slate-950 md:hover:bg-white/60 md:dark:hover:bg-slate-900/60 hover:shadow-sm dark:hover:shadow-lg transition-all gap-2 sm:gap-4 shadow-[0_2px_12px_rgba(15,23,42,0.02)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.15)]"
                 >
                   <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                     {/* Category Icon */}
-                    <span className={`p-2 sm:p-2.5 rounded-xl shrink-0 ${meta.bg}/80 dark:bg-slate-950/40 ${meta.color} dark:brightness-110 border border-white/60 dark:border-white/5 backdrop-blur-xs`}>
+                    <span className={`p-2 sm:p-2.5 rounded-xl shrink-0 ${meta.bg}/80 dark:bg-slate-950/40 ${meta.color} dark:brightness-110 border border-white/60 dark:border-white/5`}>
                       <IconComponent className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </span>
                     
@@ -217,7 +217,7 @@ export default function TransactionList({
                   <div className="flex items-center gap-2 sm:gap-4 shrink-0">
                     <div className="text-right">
                       {/* Indian date representation */}
-                      <span className="text-[10px] font-mono bg-slate-200/60 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-lg font-bold backdrop-blur-xs">
+                      <span className="text-[10px] font-mono bg-slate-200/60 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-lg font-bold">
                         {formatIndianDate(t.date)}
                       </span>
                       <p className="text-sm font-mono font-black text-slate-900 dark:text-white mt-1">

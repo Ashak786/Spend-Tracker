@@ -72,7 +72,7 @@ export default function ExpenseCategoryList({
   const hasSpending = totalSpent > 0;
 
   return (
-    <div className="bg-white/50 dark:bg-slate-900/40 backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-4 sm:p-6 shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:shadow-[0_12px_36px_rgba(15,23,42,0.08)] dark:hover:shadow-[0_12px_36px_rgba(0,0,0,0.4)] transition-all duration-300">
+    <div className="bg-white dark:bg-slate-900 md:bg-white/50 md:dark:bg-slate-900/40 backdrop-blur-none md:backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-4 sm:p-6 shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:shadow-[0_12px_36px_rgba(15,23,42,0.08)] dark:hover:shadow-[0_12px_36px_rgba(0,0,0,0.4)] transition-all duration-300">
       <div className="flex items-center gap-2 mb-5">
         <PieChart className="w-4 h-4 text-teal-600 dark:text-teal-400 animate-pulse" />
         <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
@@ -101,7 +101,7 @@ export default function ExpenseCategoryList({
               <div key={item.category} className="space-y-2">
                 <div className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
-                    <span className={`p-1.5 rounded-xl ${meta.bg}/60 dark:bg-slate-950/40 ${meta.color} dark:brightness-110 border border-slate-200/40 dark:border-white/5 shrink-0 backdrop-blur-xs`}>
+                    <span className={`p-1.5 rounded-xl ${meta.bg}/60 dark:bg-slate-950/40 ${meta.color} dark:brightness-110 border border-slate-200/40 dark:border-white/5 shrink-0`}>
                       <IconComponent className="w-3.5 h-3.5" />
                     </span>
                     <span className="font-bold text-slate-800 dark:text-slate-200">{item.category}</span>
@@ -110,14 +110,14 @@ export default function ExpenseCategoryList({
                     <span className="font-mono font-black text-slate-900 dark:text-white">
                       {formatCurrency(item.amount)}
                     </span>
-                    <span className="text-[10px] font-black text-teal-600 dark:text-teal-400 ml-1.5 bg-teal-50/70 dark:bg-teal-950/30 px-2 py-0.5 rounded-md backdrop-blur-xs">
+                    <span className="text-[10px] font-black text-teal-600 dark:text-teal-400 ml-1.5 bg-teal-50/70 dark:bg-teal-950/30 px-2 py-0.5 rounded-md">
                       {item.percentage.toFixed(0)}%
                     </span>
                   </div>
                 </div>
                 
                 {/* Visual mini bar matching Bento progress track */}
-                <div className="w-full bg-slate-100/40 dark:bg-slate-950/40 h-6 rounded-xl overflow-hidden border border-slate-200/50 dark:border-white/5 p-0.5 backdrop-blur-xs">
+                <div className="w-full bg-slate-100/40 dark:bg-slate-950/40 h-6 rounded-xl overflow-hidden border border-slate-200/50 dark:border-white/5 p-0.5">
                   <div
                     style={{
                       width: `${item.percentage}%`,
