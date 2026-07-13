@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { UserProfile, Transaction, CategoryType } from '../types';
 import { formatCurrency, formatMonthYear, getMonthlyIncomeDetails } from '../utils';
-import { Wallet, PiggyBank, Receipt, AlertCircle, ArrowDownRight, ArrowUpRight, Edit2, X } from 'lucide-react';
+import { Wallet, PiggyBank, IndianRupee, AlertCircle, ArrowDownRight, ArrowUpRight, Edit2, X } from 'lucide-react';
 import { CATEGORY_META } from './ExpenseCategoryList';
 
 interface DashboardOverviewProps {
@@ -67,8 +67,8 @@ export default function DashboardOverview({
       {/* Month Selection and Header */}
       <div className="flex items-center justify-between gap-2 shrink-0">
         <div className="min-w-0">
-          <p className="text-slate-500 text-[10px] sm:text-xs font-semibold truncate">
-            Dashboard for <span className="font-bold text-slate-800">{currentUser.name}</span>
+          <p className="text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-semibold truncate">
+            Dashboard for <span className="font-bold text-slate-800 dark:text-white">{currentUser.name}</span>
           </p>
         </div>
 
@@ -78,7 +78,7 @@ export default function DashboardOverview({
             id="month-select"
             value={selectedMonth}
             onChange={e => onMonthChange(e.target.value)}
-            className="text-xs font-bold bg-white border-2 border-slate-200 rounded-xl px-2.5 py-1.5 text-slate-700 shadow-xs focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer"
+            className="text-xs font-bold bg-white/40 dark:bg-slate-900/30 backdrop-blur-md border border-white/60 dark:border-white/10 rounded-xl px-2.5 py-1.5 text-slate-700 dark:text-slate-200 shadow-[0_4px_12px_rgba(15,23,42,0.03)] focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer focus:bg-white/95 dark:focus:bg-slate-900/90"
           >
             {availableMonths.map(m => (
               <option key={m} value={m}>
@@ -93,15 +93,15 @@ export default function DashboardOverview({
       <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-3 -mx-4 px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:grid md:grid-cols-3 md:gap-6 md:pb-0 md:mx-0 md:px-0">
         {/* Salary Income Card */}
         {isEditingIncome ? (
-          <div className="bg-teal-700 rounded-3xl sm:rounded-[32px] p-5 sm:p-6 text-white flex flex-col justify-between shadow-xl relative overflow-hidden min-h-[140px] sm:min-h-[160px] w-[84vw] shrink-0 snap-center md:w-auto transition-all">
+          <div className="bg-blue-700/85 dark:bg-blue-950/80 backdrop-blur-xl border border-white/30 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-5 sm:p-6 text-white flex flex-col justify-between shadow-[0_8px_32px_rgba(37,99,235,0.15)] relative overflow-hidden min-h-[140px] sm:min-h-[160px] w-[84vw] shrink-0 snap-center md:w-auto transition-all duration-300">
             <div className="space-y-3 z-10 w-full">
               <div className="flex items-center justify-between">
-                <p className="text-teal-200 uppercase tracking-widest text-[9px] font-black">
+                <p className="text-blue-200 uppercase tracking-widest text-[9px] font-black">
                   Adjust Income for {formatMonthYear(selectedMonth)}
                 </p>
                 <button 
                   onClick={() => setIsEditingIncome(false)} 
-                  className="text-teal-200 hover:text-white p-1 hover:bg-white/10 rounded-lg cursor-pointer"
+                  className="text-blue-200 hover:text-white p-1 hover:bg-white/10 rounded-lg cursor-pointer"
                   title="Close"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -110,24 +110,24 @@ export default function DashboardOverview({
               
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-[9px] font-bold text-teal-200 mb-0.5">Base Salary (₹)</label>
+                  <label className="block text-[9px] font-bold text-blue-200 mb-0.5">Base Salary (₹)</label>
                   <input
                     type="number"
                     min="1"
                     value={tempSalary}
                     onChange={e => setTempSalary(e.target.value)}
-                    className="w-full text-xs font-bold bg-teal-800 border border-teal-500 rounded-lg px-2 py-1 text-white focus:outline-none focus:ring-1 focus:ring-teal-300"
+                    className="w-full text-xs font-bold bg-blue-800 dark:bg-blue-900 border border-blue-500 dark:border-blue-700 rounded-lg px-2 py-1 text-white focus:outline-none focus:ring-1 focus:ring-blue-300"
                   />
                 </div>
                 <div>
-                  <label className="block text-[9px] font-bold text-teal-200 mb-0.5">Incentive (₹)</label>
+                  <label className="block text-[9px] font-bold text-blue-200 mb-0.5">Incentive (₹)</label>
                   <input
                     type="number"
                     min="0"
                     value={tempIncentive}
                     onChange={e => setTempIncentive(e.target.value)}
                     placeholder="0"
-                    className="w-full text-xs font-bold bg-teal-800 border border-teal-500 rounded-lg px-2 py-1 text-white focus:outline-none focus:ring-1 focus:ring-teal-300"
+                    className="w-full text-xs font-bold bg-blue-800 dark:bg-blue-900 border border-blue-500 dark:border-blue-700 rounded-lg px-2 py-1 text-white focus:outline-none focus:ring-1 focus:ring-blue-300"
                   />
                 </div>
               </div>
@@ -152,7 +152,7 @@ export default function DashboardOverview({
                     onUpdateUser?.(updatedUser);
                     setIsEditingIncome(false);
                   }}
-                  className="flex-1 bg-white text-teal-800 hover:bg-teal-50 px-2.5 py-1.5 rounded-xl text-[10px] font-black uppercase text-center cursor-pointer transition-colors"
+                  className="flex-1 bg-white dark:bg-blue-900 text-blue-800 dark:text-blue-200 hover:bg-blue-50 dark:hover:bg-blue-950/65 px-2.5 py-1.5 rounded-xl text-[10px] font-black uppercase text-center cursor-pointer transition-colors"
                 >
                   Override
                 </button>
@@ -170,7 +170,7 @@ export default function DashboardOverview({
                       setIsEditingIncome(false);
                     }}
                     title="Reset to Profile Default"
-                    className="bg-teal-800 hover:bg-teal-900 border border-teal-500 px-2.5 py-1.5 rounded-xl text-[10px] font-bold uppercase cursor-pointer"
+                    className="bg-blue-800 dark:bg-blue-900 hover:bg-blue-900 dark:hover:bg-blue-950 border border-blue-500 dark:border-blue-700 px-2.5 py-1.5 rounded-xl text-[10px] font-bold uppercase cursor-pointer"
                   >
                     Reset
                   </button>
@@ -179,13 +179,13 @@ export default function DashboardOverview({
             </div>
           </div>
         ) : (
-          <div className="bg-teal-600 rounded-3xl sm:rounded-[32px] p-5 sm:p-6 text-white flex flex-col justify-between shadow-xl relative overflow-hidden min-h-[140px] sm:min-h-[160px] w-[84vw] shrink-0 snap-center md:w-auto">
+          <div className="bg-gradient-to-br from-blue-600/80 to-blue-800/80 dark:from-blue-950/55 dark:to-slate-900/40 backdrop-blur-xl border border-white/30 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-5 sm:p-6 text-white flex flex-col justify-between shadow-[0_8px_32px_rgba(37,99,235,0.15)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] relative overflow-hidden min-h-[140px] sm:min-h-[160px] w-[84vw] shrink-0 snap-center md:w-auto hover:shadow-[0_12px_36px_rgba(37,99,235,0.22)] transition-all duration-300">
             <div className="absolute top-[-20px] right-[-20px] w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
             <div>
               <div className="flex items-center gap-1.5">
-                <p className="text-teal-200 uppercase tracking-widest text-[10px] font-black">Monthly Salary</p>
+                <p className="text-blue-100 uppercase tracking-widest text-[10px] font-black">Monthly Income</p>
                 {isCustom && (
-                  <span className="text-[8px] bg-amber-500 text-white font-black px-1.5 py-0.5 rounded-md uppercase tracking-wider">
+                  <span className="text-[8px] bg-orange-500 text-white font-black px-1.5 py-0.5 rounded-md uppercase tracking-wider">
                     Custom
                   </span>
                 )}
@@ -194,12 +194,12 @@ export default function DashboardOverview({
                 {formatCurrency(effectiveSalary)}
               </h2>
               {incentive ? (
-                <div className="text-[10px] text-teal-100 font-medium leading-tight mt-1.5 space-y-0.5">
+                <div className="text-[10px] text-blue-100 font-medium leading-tight mt-1.5 space-y-0.5">
                   <div>Base: {formatCurrency(salary)}</div>
-                  <div>+ Incentive / Bonus: {formatCurrency(incentive)}</div>
+                  <div className="text-orange-300 font-semibold">+ Inc / Bonus: {formatCurrency(incentive)}</div>
                 </div>
               ) : (
-                <div className="text-[10px] text-teal-100 font-medium leading-tight mt-1.5">
+                <div className="text-[10px] text-blue-100 font-medium leading-tight mt-1.5">
                   Base Salary (No Incentive)
                 </div>
               )}
@@ -207,66 +207,66 @@ export default function DashboardOverview({
             <div className="flex justify-between items-center z-10 mt-4">
               <button
                 onClick={() => setIsEditingIncome(true)}
-                className="text-[10px] text-teal-100 hover:text-white bg-white/10 hover:bg-white/20 px-3 py-1 rounded-full font-bold inline-flex items-center gap-1.5 transition-all cursor-pointer"
+                className="text-[10px] text-blue-100 hover:text-white bg-white/15 hover:bg-white/25 px-3 py-1 rounded-full font-bold inline-flex items-center gap-1.5 transition-all cursor-pointer border border-white/10"
               >
                 <Edit2 className="w-3 h-3" />
                 <span>{isCustom ? 'Adjusted' : 'Adjust'}</span>
               </button>
-              <Wallet className="w-5 h-5 text-teal-200" />
+              <Wallet className="w-5 h-5 text-blue-200" />
             </div>
           </div>
         )}
 
         {/* Total Spending Card */}
-        <div className="bg-white border-2 border-slate-200 rounded-3xl sm:rounded-[32px] p-5 sm:p-6 shadow-sm flex flex-col justify-between min-h-[140px] sm:min-h-[160px] w-[84vw] shrink-0 snap-center md:w-auto">
+        <div className="bg-white/50 dark:bg-slate-900/40 backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-5 sm:p-6 shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] flex flex-col justify-between min-h-[140px] sm:min-h-[160px] w-[84vw] shrink-0 snap-center md:w-auto hover:shadow-[0_12px_36px_rgba(15,23,42,0.08)] dark:hover:shadow-[0_12px_36px_rgba(0,0,0,0.4)] transition-all duration-300">
           <div>
-            <p className="text-slate-400 uppercase tracking-widest text-[10px] font-black">Total Spent</p>
-            <h2 className={`text-2xl sm:text-3xl font-black tracking-tight font-display mt-2 ${isOverspent ? 'text-rose-600 animate-pulse' : 'text-slate-900'}`}>
+            <p className="text-slate-400 dark:text-slate-500 uppercase tracking-widest text-[10px] font-black">Total Spent</p>
+            <h2 className={`text-2xl sm:text-3xl font-black tracking-tight font-display mt-2 ${isOverspent ? 'text-rose-600 animate-pulse' : 'text-slate-900 dark:text-white'}`}>
               {formatCurrency(totalSpent)}
             </h2>
           </div>
           <div className="flex justify-between items-center mt-4">
             {isOverspent ? (
-              <span className="text-[10px] font-black text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full flex items-center gap-1">
+              <span className="text-[10px] font-black text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/20 px-2.5 py-1 rounded-full flex items-center gap-1">
                 <AlertCircle className="w-3.5 h-3.5" />
                 Overspent Limit!
               </span>
             ) : (
-              <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">
+              <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/60 px-2.5 py-1 rounded-full">
                 {spentPercentage.toFixed(0)}% Spent
               </span>
             )}
-            <Receipt className={`w-5 h-5 ${isOverspent ? 'text-rose-500' : 'text-slate-400'}`} />
+            <IndianRupee className={`w-5 h-5 ${isOverspent ? 'text-rose-500' : 'text-slate-400 dark:text-slate-500'}`} />
           </div>
         </div>
 
         {/* Net Savings / Balance Card */}
-        <div className="bg-white border-2 border-slate-200 rounded-3xl sm:rounded-[32px] p-5 sm:p-6 shadow-sm flex flex-col justify-between min-h-[140px] sm:min-h-[160px] w-[84vw] shrink-0 snap-center md:w-auto">
+        <div className="bg-white/50 dark:bg-slate-900/40 backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-5 sm:p-6 shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] flex flex-col justify-between min-h-[140px] sm:min-h-[160px] w-[84vw] shrink-0 snap-center md:w-auto hover:shadow-[0_12px_36px_rgba(15,23,42,0.08)] dark:hover:shadow-[0_12px_36px_rgba(0,0,0,0.4)] transition-all duration-300">
           <div>
-            <p className="text-slate-400 uppercase tracking-widest text-[10px] font-black">Remaining Balance</p>
-            <h2 className={`text-2xl sm:text-3xl font-black tracking-tight font-display mt-2 ${remainingBalance >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+            <p className="text-slate-400 dark:text-slate-500 uppercase tracking-widest text-[10px] font-black">Remaining Balance</p>
+            <h2 className={`text-2xl sm:text-3xl font-black tracking-tight font-display mt-2 ${remainingBalance >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
               {formatCurrency(remainingBalance)}
             </h2>
           </div>
           <div className="flex justify-between items-center mt-4">
-            <span className={`text-[10px] font-black px-2.5 py-1 rounded-full ${remainingBalance >= 0 ? 'text-emerald-700 bg-emerald-50' : 'text-rose-700 bg-rose-50'}`}>
+            <span className={`text-[10px] font-black px-2.5 py-1 rounded-full ${remainingBalance >= 0 ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30' : 'text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30'}`}>
               {remainingBalance >= 0 ? `Savings Rate: ${savingsRate.toFixed(0)}%` : 'Budget Deficit'}
             </span>
-            <PiggyBank className={`w-5 h-5 ${remainingBalance >= 0 ? 'text-emerald-500' : 'text-rose-400'}`} />
+            <PiggyBank className={`w-5 h-5 ${remainingBalance >= 0 ? 'text-emerald-500' : 'text-rose-400 dark:text-rose-500'}`} />
           </div>
         </div>
       </div>
 
       {/* Progress Bars for Salary Consumption */}
-      <div className="bg-white border-2 border-slate-200 rounded-3xl sm:rounded-[32px] p-5 sm:p-6 shadow-sm flex flex-col justify-between">
+      <div className="bg-white/50 dark:bg-slate-900/40 backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-5 sm:p-6 shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] flex flex-col justify-between hover:shadow-[0_12px_36px_rgba(15,23,42,0.08)] dark:hover:shadow-[0_12px_36px_rgba(0,0,0,0.4)] transition-all duration-300">
         <div className="flex justify-between items-center mb-3">
-          <p className="text-slate-400 uppercase tracking-widest text-[10px] font-black">Budget Utilization</p>
-          <span className={`text-xs font-black ${isOverspent ? 'text-rose-600 animate-pulse' : spentPercentage > 85 ? 'text-amber-500' : 'text-teal-600'}`}>
+          <p className="text-slate-400 dark:text-slate-500 uppercase tracking-widest text-[10px] font-black">Budget Utilization</p>
+          <span className={`text-xs font-black ${isOverspent ? 'text-rose-600 animate-pulse' : spentPercentage > 85 ? 'text-amber-500' : 'text-blue-600 dark:text-blue-400'}`}>
             {spentPercentage.toFixed(0)}% {isOverspent ? 'Exceeded' : 'Exhausted'}
           </span>
         </div>
         <div>
-          <div className={`w-full h-10 rounded-2xl overflow-hidden relative border-2 p-1 flex gap-0.5 transition-all ${isOverspent ? 'border-rose-300 bg-rose-50/50' : 'border-slate-200 bg-slate-100'}`}>
+          <div className={`w-full h-10 rounded-2xl overflow-hidden relative border p-1 flex gap-0.5 transition-all ${isOverspent ? 'border-rose-300 dark:border-rose-900/30 bg-rose-50/50 dark:bg-rose-950/30' : 'border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-slate-950/50'}`}>
             {categorySegments.map((seg) => {
               // Normalize to fit within 100% of the bar width if overspent
               const displayWidth = isOverspent
@@ -291,12 +291,12 @@ export default function DashboardOverview({
               );
             })}
             {categorySegments.length === 0 && (
-              <div className="h-full w-full rounded-lg bg-slate-200 animate-pulse"></div>
+              <div className="h-full w-full rounded-lg bg-slate-200 dark:bg-slate-800 animate-pulse"></div>
             )}
           </div>
           <div className="flex justify-between mt-3 text-xs font-bold">
-            <span className="text-slate-400">Spent: {formatCurrency(totalSpent)}</span>
-            <span className="text-slate-900 font-black">Limit: {formatCurrency(effectiveSalary)}</span>
+            <span className="text-slate-400 dark:text-slate-500">Spent: {formatCurrency(totalSpent)}</span>
+            <span className="text-slate-900 dark:text-white font-black">Limit: {formatCurrency(effectiveSalary)}</span>
           </div>
         </div>
       </div>

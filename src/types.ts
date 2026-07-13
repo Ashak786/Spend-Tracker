@@ -10,6 +10,7 @@ export interface UserProfile {
       incentive?: number | null;
     }
   } | null;
+  photoUrl?: string;
 }
 
 export type CategoryType =

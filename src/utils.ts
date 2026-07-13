@@ -121,137 +121,169 @@ async function loadPoppinsFonts(doc: any): Promise<boolean> {
 }
 
 /**
- * Renders the original SVG logo to a high-resolution PNG data URI.
+ * Renders the original SVG logo or fetches the custom Google Drive logo to a high-resolution PNG data URI.
  */
 async function renderSvgLogoToPng(): Promise<string> {
   return new Promise((resolve) => {
-    const svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" width="200" height="200">
-      <defs>
-        <linearGradient id="tealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#2E8A99" />
-          <stop offset="100%" stop-color="#0B4F5C" />
-        </linearGradient>
-        <linearGradient id="greenArrowGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="#15803D" />
-          <stop offset="50%" stop-color="#22C55E" />
-          <stop offset="100%" stop-color="#86EFAC" />
-        </linearGradient>
-        <linearGradient id="silverGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#F8FAFC" />
-          <stop offset="30%" stop-color="#CBD5E1" />
-          <stop offset="70%" stop-color="#64748B" />
-          <stop offset="100%" stop-color="#E2E8F0" />
-        </linearGradient>
-        <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
-          <feDropShadow dx="1" dy="1" stdDeviation="1" flood-opacity="0.2" />
-        </filter>
-      </defs>
-
-      {/* Outer circular arrows */}
-      <g>
-        <path
-          d="M 55,145 A 70,70 0 0,1 140,55"
-          stroke="url(#tealGrad)"
-          stroke-width="10"
-          stroke-linecap="round"
-        />
-        <path
-          d="M 125,50 L 148,50 L 142,75 Z"
-          fill="#2E8A99"
-        />
-
-        <path
-          d="M 145,55 A 70,70 0 0,1 60,145"
-          stroke="url(#tealGrad)"
-          stroke-width="10"
-          stroke-linecap="round"
-        />
-        <path
-          d="M 75,150 L 52,150 L 58,125 Z"
-          fill="#2E8A99"
-        />
-      </g>
-
-      {/* Bar Chart Bars */}
-      <g>
-        <rect
-          x="68"
-          y="110"
-          width="16"
-          height="35"
-          rx="3"
-          fill="#166534"
-        />
-        <rect
-          x="88"
-          y="90"
-          width="16"
-          height="55"
-          rx="3"
-          fill="#15803D"
-        />
-        <rect
-          x="108"
-          y="70"
-          width="16"
-          height="75"
-          rx="3"
-          fill="#22C55E"
-        />
-      </g>
-
-      {/* Rising Arrow path */}
-      <g>
-        <path
-          d="M 55,130 L 85,95 L 125,55"
-          stroke="url(#greenArrowGrad)"
-          stroke-width="8"
-          stroke-linecap="round"
-        />
-        <path
-          d="M 115,55 L 132,48 L 125,65 Z"
-          fill="#86EFAC"
-        />
-      </g>
-
-      {/* Silver Rupee symbol on Bar 3 */}
-      <text
-        x="114"
-        y="112"
-        font-family="sans-serif"
-        font-weight="900"
-        font-size="24"
-        fill="url(#silverGrad)"
-        filter="url(#shadow)"
-      >
-        ₹
-      </text>
-    </svg>`;
-
+    const logoUrl = "https://lh3.googleusercontent.com/d/1nm8tjDQZ2x4j_ZOjtcwRdtqMpIOhsDUJ";
     const img = new Image();
-    const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-    const url = URL.createObjectURL(svgBlob);
+    img.crossOrigin = "anonymous";
     
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = 400;
-      canvas.height = 400;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.drawImage(img, 0, 0, 400, 400);
-        const pngData = canvas.toDataURL('image/png');
-        URL.revokeObjectURL(url);
-        resolve(pngData);
-      } else {
+    const renderSvgFallback = () => {
+      const svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" width="200" height="200">
+        <defs>
+          <linearGradient id="logoBlueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#1E3A8A" />
+            <stop offset="50%" stop-color="#2563EB" />
+            <stop offset="100%" stop-color="#1D4ED8" />
+          </linearGradient>
+          <linearGradient id="logoOrangeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#FB923C" />
+            <stop offset="60%" stop-color="#EA580C" />
+            <stop offset="100%" stop-color="#C2410C" />
+          </linearGradient>
+          <linearGradient id="arrowGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#2563EB" />
+            <stop offset="60%" stop-color="#F97316" />
+            <stop offset="100%" stop-color="#EA580C" />
+          </linearGradient>
+          <filter id="subtleShadow" x="-10%" y="-10%" width="120%" height="120%">
+            <feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.15" />
+          </filter>
+        </defs>
+
+        {/* OWL SILHOUETTE BODY (Deep Blue) */}
+        <path
+          d="M 40,55 C 35,25 50,15 65,22 C 80,30 120,30 135,22 C 150,15 165,25 160,55 C 155,90 155,140 140,165 C 125,190 75,190 60,165 C 45,140 45,90 40,55 Z"
+          fill="url(#logoBlueGrad)"
+          filter="url(#subtleShadow)"
+        />
+
+        {/* ORANGE EYEBROW / FOREHEAD TRIM */}
+        <path
+          d="M 47,45 C 55,30 75,32 90,42 C 100,48 100,48 110,42 C 125,32 145,30 153,45 C 155,50 145,55 135,50 C 120,42 110,50 100,58 C 90,50 80,42 65,50 C 55,55 45,50 47,45 Z"
+          fill="url(#logoOrangeGrad)"
+        />
+
+        {/* OWL FACE EYE BACKGROUNDS (White patches) */}
+        <circle cx="72" cy="70" r="26" fill="#FFFFFF" />
+        <circle cx="128" cy="70" r="26" fill="#FFFFFF" />
+
+        {/* OWL EYE OUTLINE (Blue) */}
+        <circle cx="72" cy="70" r="20" fill="none" stroke="url(#logoBlueGrad)" stroke-width="4.5" />
+        <circle cx="128" cy="70" r="20" fill="none" stroke="url(#logoBlueGrad)" stroke-width="4.5" />
+
+        {/* PUPILS (Blue) */}
+        <circle cx="72" cy="70" r="13" fill="#1E3A8A" />
+        <circle cx="128" cy="70" r="13" fill="#1E3A8A" />
+
+        {/* EYE REFLECTIONS */}
+        <circle cx="68" cy="65" r="4.5" fill="#FFFFFF" />
+        <circle cx="124" cy="65" r="4.5" fill="#FFFFFF" />
+        <circle cx="77" cy="74" r="2" fill="#FFFFFF" />
+        <circle cx="133" cy="74" r="2" fill="#FFFFFF" />
+
+        {/* BEAK (Orange) */}
+        <path
+          d="M 93,76 L 107,76 L 100,99 Z"
+          fill="url(#logoOrangeGrad)"
+        />
+
+        {/* WHITE CHEST EMBLEM AREA */}
+        <path
+          d="M 60,110 C 60,95 140,95 140,110 C 140,135 125,165 100,165 C 75,165 60,135 60,110 Z"
+          fill="#FFFFFF"
+        />
+
+        {/* RIGHT ORANGE WING / SIDE BODY ACCENT */}
+        <path
+          d="M 140,110 C 152,110 162,130 152,155 C 142,175 120,175 120,175 C 120,175 135,160 140,140 C 143,125 140,110 140,110 Z"
+          fill="url(#logoOrangeGrad)"
+        />
+
+        {/* RISING TREND ARROW */}
+        <g>
+          <path
+            d="M 45,165 L 142,68"
+            stroke="url(#arrowGrad)"
+            stroke-width="11"
+            stroke-linecap="round"
+          />
+          {/* ARROW HEAD */}
+          <path
+            d="M 124,65 L 152,61 L 148,89 Z"
+            fill="url(#logoOrangeGrad)"
+          />
+        </g>
+
+        {/* RUPEE SYMBOL (₹) inside chest */}
+        <text
+          x="100"
+          y="143"
+          font-family="sans-serif"
+          font-weight="900"
+          font-size="36"
+          fill="#1E3A8A"
+          text-anchor="middle"
+        >
+          ₹
+        </text>
+      </svg>`;
+
+      const svgImg = new Image();
+      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+      
+      svgImg.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 400;
+        canvas.height = 400;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(svgImg, 0, 0, 400, 400);
+          const pngData = canvas.toDataURL('image/png');
+          URL.revokeObjectURL(url);
+          resolve(pngData);
+        } else {
+          URL.revokeObjectURL(url);
+          resolve('');
+        }
+      };
+      svgImg.onerror = () => {
         URL.revokeObjectURL(url);
         resolve('');
+      };
+      svgImg.src = url;
+    };
+
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 400;
+        canvas.height = 400;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          // Clear any background & clip context to a perfect circle to prevent corner overflow
+          ctx.beginPath();
+          ctx.arc(200, 200, 200, 0, Math.PI * 2);
+          ctx.clip();
+          ctx.drawImage(img, 0, 0, 400, 400);
+          const pngData = canvas.toDataURL('image/png');
+          resolve(pngData);
+        } else {
+          renderSvgFallback();
+        }
+      } catch (err) {
+        console.warn("Failed drawing custom logo to canvas, falling back to SVG logo:", err);
+        renderSvgFallback();
       }
     };
+
     img.onerror = () => {
-      URL.revokeObjectURL(url);
-      resolve('');
+      renderSvgFallback();
     };
-    img.src = url;
+
+    img.src = logoUrl;
   });
 }
 
@@ -291,11 +323,11 @@ export async function exportToPDF(
   }
   const italicStyle = font === 'Poppins' ? 'normal' : 'italic';
   
-  // Custom Color Theme: Teal / Slate / Crimson Accent
-  const primaryColor = [13, 148, 136];   // Teal-600
+  // Custom Color Theme: Deep Blue / Slate / Orange Accent
+  const primaryColor = [30, 58, 138];   // Deep Blue (#1E3A8A)
   const secondaryColor = [30, 41, 59];  // Slate-800
   const lightBgColor = [241, 245, 249];  // Slate-100
-  const accentColor = [220, 38, 38];    // Crimson Red-600
+  const accentColor = [234, 88, 12];    // Orange-600 (#EA580C)
   const grayColor = [100, 116, 139];    // Slate-500
 
   // 1. Draw Header Banner
@@ -325,8 +357,8 @@ export async function exportToPDF(
   // Subtitle
   doc.setFont(font, 'normal');
   doc.setFontSize(7.5);
-  doc.setTextColor(204, 251, 241); // Light Teal-100 text
-  doc.text('SPEND TRACKER', 39, 27);
+  doc.setTextColor(254, 215, 170); // Light Orange-200 text
+  doc.text('SMART SPEND TRACKER', 39, 27);
 
   // 2. Right Aligned Metadata in Banner
   doc.setFont(font, 'bold');

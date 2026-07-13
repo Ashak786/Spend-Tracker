@@ -36,6 +36,30 @@ export default function App() {
   const [isConfirmingClear, setIsConfirmingClear] = useState(false);
   const [isMobileFormOpen, setIsMobileFormOpen] = useState(false);
 
+  // Listen to system appearance theme changes and apply 'dark' class accordingly
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    
+    const handleChange = (e: MediaQueryListEvent | MediaQueryList) => {
+      if (e.matches) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    };
+
+    // Initial check
+    handleChange(mediaQuery);
+
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    } else {
+      mediaQuery.addListener(handleChange);
+      return () => mediaQuery.removeListener(handleChange);
+    }
+  }, []);
+
   // Subscribe to real-time updates from Firestore
   useEffect(() => {
     const unsubscribeUsers = subscribeUsers((fetchedUsers) => {
@@ -148,13 +172,14 @@ export default function App() {
   };
 
   // Handler to add a new profile
-  const handleAddUser = async (name: string, salary: number, incentive?: number | null) => {
+  const handleAddUser = async (name: string, salary: number, incentive?: number | null, photoUrl?: string) => {
     const newUser: UserProfile = {
       id: `user-${Date.now()}`,
       name,
       salary,
       incentive: incentive ?? null,
       joinedAt: new Date().toISOString().slice(0, 10),
+      photoUrl,
     };
     await saveUserProfile(newUser);
     setCurrentUser(newUser); // Automatically switch to the newly created profile
@@ -238,42 +263,62 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F1F5F9] text-slate-800 font-sans selection:bg-teal-50 selection:text-teal-900">
-      {/* Top Banner Accent */}
-      <div className="h-1.5 w-full bg-teal-600" />
+    <div className="min-h-screen relative overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans selection:bg-blue-50 dark:selection:bg-blue-950/40 selection:text-blue-900 transition-colors duration-300">
+      {/* Beautiful ambient glowing spots for Glassmorphism matching the brand palette */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] max-w-[600px] rounded-full bg-blue-300/20 dark:bg-blue-500/5 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[10%] right-[-10%] w-[60vw] h-[60vw] max-w-[700px] rounded-full bg-orange-300/15 dark:bg-orange-500/5 blur-[150px] pointer-events-none" />
+      <div className="absolute top-[45%] right-[15%] w-[35vw] h-[35vw] max-w-[500px] rounded-full bg-blue-200/15 dark:bg-blue-500/5 blur-[100px] pointer-events-none" />
+      <div className="absolute top-[15%] left-[40%] w-[40vw] h-[40vw] max-w-[550px] rounded-full bg-orange-200/15 dark:bg-orange-500/5 blur-[120px] pointer-events-none" />
+
+      {/* Top Banner Accent with Spend Wisely deep blue to orange gradient */}
+      <div className="h-1.5 w-full bg-gradient-to-r from-blue-700 via-orange-500 to-blue-800 relative z-10 animate-pulse" />
 
       {/* Main Workspace container */}
-      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-4 sm:space-y-6">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-4 sm:space-y-6 relative z-10">
         
-        {/* Header section as a Bento Card */}
-        <header className="bg-white border-2 border-slate-200 rounded-3xl sm:rounded-[32px] p-4 sm:p-6 shadow-sm">
+        {/* Header section as a Bento Card with elevated branding & profile status */}
+        <header className="bg-white/50 dark:bg-slate-900/40 backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-4 sm:p-5 shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300 hover:border-white/95 dark:hover:border-white/15">
           <div className="flex items-center justify-between gap-4 w-full">
             <div className="flex items-center gap-3">
-              <LogoFull size={42} />
+              <LogoFull size={48} />
             </div>
+
+            {currentUser && (
+              <div className="flex items-center gap-2 sm:gap-3 bg-white/40 dark:bg-slate-950/20 px-3.5 py-2 rounded-2xl border border-white/60 dark:border-white/5 backdrop-blur-xs shadow-xs">
+                <img
+                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(currentUser.name)}`}
+                  alt={currentUser.name}
+                  className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shrink-0"
+                />
+                <div className="text-right hidden sm:block">
+                  <p className="text-[8px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">Active Profile</p>
+                  <p className="text-xs font-bold text-slate-800 dark:text-white leading-tight mt-0.5">{currentUser.name}</p>
+                </div>
+              </div>
+            )}
           </div>
         </header>
 
         {loading ? (
-          <div className="bg-white border-2 border-slate-200 rounded-3xl sm:rounded-[32px] p-6 sm:p-12 text-center shadow-sm max-w-sm mx-auto space-y-4 my-6 sm:my-12">
-            <div className="w-12 h-12 rounded-2xl bg-teal-50 border-2 border-teal-100 flex items-center justify-center mx-auto text-teal-600 animate-spin">
+          <div className="bg-white/50 dark:bg-slate-900/40 backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-6 sm:p-12 text-center shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] max-w-sm mx-auto space-y-4 my-6 sm:my-12">
+            <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border-2 border-blue-100 dark:border-blue-900/40 flex items-center justify-center mx-auto text-blue-600 dark:text-blue-400 animate-spin">
               <Sparkles className="w-6 h-6" />
             </div>
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+            <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
               Syncing Cloud Ledger...
             </p>
           </div>
         ) : currentUser === null ? (
-          <div className="bg-white border-2 border-slate-200 rounded-3xl sm:rounded-[32px] p-5 sm:p-8 shadow-sm max-w-xl mx-auto text-center space-y-4 sm:space-y-6 my-6 sm:my-12">
-            <div className="w-16 h-16 rounded-[24px] bg-teal-50 flex items-center justify-center text-teal-600 mx-auto border-2 border-teal-100 shadow-sm animate-pulse">
-              <IndianRupee className="w-8 h-8 font-black" />
+          <div className="bg-white/50 dark:bg-slate-900/40 backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-5 sm:p-8 shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] max-w-xl mx-auto text-center space-y-4 sm:space-y-6 my-6 sm:my-12">
+            <div className="w-16 h-16 rounded-[24px] bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center text-blue-600 dark:text-blue-400 mx-auto border-2 border-blue-100 dark:border-blue-900/40 shadow-sm animate-pulse">
+              <IndianRupee className="w-8 h-8 font-black text-orange-500" />
             </div>
             
             <div className="space-y-2">
-              <h2 className="text-2xl font-black font-display text-slate-900 tracking-tight">
+              <h2 className="text-2xl font-black font-display text-slate-900 dark:text-white tracking-tight uppercase">
                 Welcome to Spend Wisely
               </h2>
-              <p className="text-sm font-semibold text-slate-500 max-w-sm mx-auto">
+              <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
                 Track your monthly INR salary and category expenses in a secure, local, bento-style dashboard.
               </p>
             </div>
@@ -298,7 +343,7 @@ export default function App() {
               );
             }} className="space-y-4 text-left max-w-sm mx-auto pt-2">
               <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1">
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
                   Your Full Name / Username
                 </label>
                 <input
@@ -306,48 +351,48 @@ export default function App() {
                   type="text"
                   required
                   placeholder="e.g. Ramesh Kumar"
-                  className="w-full text-sm px-4 py-2.5 border-2 border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white font-bold text-slate-800"
+                  className="w-full text-sm px-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/40 dark:bg-slate-900/20 backdrop-blur-xs font-bold text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1">
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
                   Monthly Base Salary (INR)
                 </label>
                 <div className="relative">
-                  <span className="absolute left-4 top-2.5 text-slate-400 text-sm font-black">₹</span>
+                  <span className="absolute left-4 top-2.5 text-slate-400 dark:text-slate-500 text-sm font-black">₹</span>
                   <input
                     name="salary"
                     type="number"
                     required
                     placeholder="e.g. 75000"
-                    className="w-full text-sm pl-8 pr-4 py-2.5 border-2 border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white font-bold text-slate-800"
+                    className="w-full text-sm pl-8 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/40 dark:bg-slate-900/20 backdrop-blur-xs font-bold text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
                   />
                 </div>
-                <p className="text-[10px] text-slate-400 mt-1 font-semibold">
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-semibold">
                   This sets your core monthly spending and balance limit.
                 </p>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-500 mb-1">
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
                   Incentive / Bonus (INR, Optional)
                 </label>
                 <div className="relative">
-                  <span className="absolute left-4 top-2.5 text-slate-400 text-sm font-bold">₹</span>
+                  <span className="absolute left-4 top-2.5 text-slate-400 dark:text-slate-500 text-sm font-bold">₹</span>
                   <input
                     name="incentive"
                     type="number"
                     min="0"
                     placeholder="e.g. 5000"
-                    className="w-full text-sm pl-8 pr-4 py-2.5 border-2 border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white font-bold text-slate-800"
+                    className="w-full text-sm pl-8 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/40 dark:bg-slate-900/20 backdrop-blur-xs font-bold text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
                   />
                 </div>
               </div>
 
               <button
                 type="submit"
-                className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-black text-white bg-teal-600 hover:bg-teal-500 rounded-2xl transition-transform hover:scale-[1.01] shadow-md cursor-pointer pt-3"
+                className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-black text-white bg-blue-600 hover:bg-blue-500 rounded-2xl transition-transform hover:scale-[1.01] shadow-md cursor-pointer pt-3"
               >
                 Create My Active Profile
               </button>
@@ -416,14 +461,14 @@ export default function App() {
         )}
 
         {/* Footer */}
-        <footer className="bg-white border-2 border-slate-200 rounded-3xl sm:rounded-[32px] p-4 sm:p-6 shadow-sm mt-4 sm:mt-6">
+        <footer className="bg-white/40 dark:bg-slate-900/30 backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-4 sm:p-6 shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] mt-4 sm:mt-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-left space-y-1">
-              <div className="flex items-center gap-1.5 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
-                <Sparkles className="w-4 h-4 text-teal-600" />
-                <span>Spend Wisely Tracker — INR Ledger Standard</span>
+              <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px]">
+                <Sparkles className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+                <span>Spend Wisely Tracker</span>
               </div>
-              <p className="text-[10px] text-teal-500 font-bold uppercase tracking-widest flex items-center gap-1">
+              <p className="text-[10px] text-teal-500 dark:text-teal-400 font-bold uppercase tracking-widest flex items-center gap-1">
                 <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse inline-block"></span>
                 Cloud Ledger Synchronized
               </p>
@@ -431,35 +476,14 @@ export default function App() {
 
             <div className="shrink-0">
               {(users.length > 0 || transactions.length > 0) && (
-                isConfirmingClear ? (
-                  <div className="flex items-center gap-1.5 bg-red-50 border-2 border-red-200 rounded-2xl p-1 shrink-0">
-                    <span className="text-[9px] sm:text-[10px] font-black text-red-600 uppercase tracking-widest pl-1.5">Wipe All?</span>
-                    <button
-                      onClick={() => {
-                        handleClearAllData();
-                        setIsConfirmingClear(false);
-                      }}
-                      className="px-3 py-1.5 text-[10px] sm:text-xs font-black text-white bg-red-600 hover:bg-red-700 rounded-xl transition-colors cursor-pointer"
-                    >
-                      Yes, Clear
-                    </button>
-                    <button
-                      onClick={() => setIsConfirmingClear(false)}
-                      className="px-3 py-1.5 text-[10px] sm:text-xs font-bold text-slate-500 hover:bg-slate-200 bg-white rounded-xl border border-slate-200 transition-colors cursor-pointer"
-                    >
-                      No
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => setIsConfirmingClear(true)}
-                    className="flex items-center gap-1.5 px-3.5 py-2 text-red-500 hover:text-red-600 hover:bg-red-50 bg-white rounded-2xl border border-slate-200 hover:border-red-200 shadow-xs transition-all duration-300 text-xs font-bold cursor-pointer"
-                    aria-label="Clear Data"
-                  >
-                    <X className="w-4 h-4 shrink-0" />
-                    <span>Clear All Data</span>
-                  </button>
-                )
+                <button
+                  onClick={() => setIsConfirmingClear(true)}
+                  className="flex items-center gap-1.5 px-3.5 py-2 text-red-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/10 hover:border-red-200 dark:hover:border-red-900/40 shadow-xs transition-all duration-300 text-xs font-bold cursor-pointer"
+                  aria-label="Clear Data"
+                >
+                  <X className="w-4 h-4 shrink-0" />
+                  <span>Clear All Data</span>
+                </button>
               )}
             </div>
           </div>
@@ -470,7 +494,7 @@ export default function App() {
           <>
             <button
               onClick={() => setIsMobileFormOpen(true)}
-              className="fixed bottom-6 right-6 z-40 md:hidden bg-teal-600 hover:bg-teal-500 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-[0_8px_30px_rgb(13,148,136,0.4)] active:scale-95 transition-all duration-200 border-2 border-white cursor-pointer group"
+              className="fixed bottom-6 right-6 z-40 md:hidden bg-teal-600 hover:bg-teal-500 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-[0_8px_30px_rgb(13,148,136,0.4)] active:scale-95 transition-all duration-200 border-2 border-white dark:border-slate-900 cursor-pointer group"
               style={{ bottom: '24px', right: '24px' }}
               aria-label="Add Expense"
             >
@@ -487,7 +511,7 @@ export default function App() {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     onClick={() => setIsMobileFormOpen(false)}
-                    className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50"
+                    className="fixed inset-0 bg-slate-950/50 backdrop-blur-md z-50"
                   />
 
                   {/* Pop-out Content Container */}
@@ -496,18 +520,18 @@ export default function App() {
                     animate={{ opacity: 1, scale: 1, x: '-50%', y: '-50%' }}
                     exit={{ opacity: 0, scale: 0.92, x: '-50%', y: '-40%' }}
                     transition={{ type: 'spring', damping: 25, stiffness: 240 }}
-                    className="fixed top-1/2 left-1/2 z-55 bg-white rounded-[32px] p-6 shadow-2xl w-[92vw] max-w-md max-h-[85vh] overflow-y-auto no-scrollbar border-2 border-slate-100"
+                    className="fixed top-1/2 left-1/2 z-55 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[32px] p-6 shadow-[0_24px_64px_rgba(15,23,42,0.15)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.4)] w-[92vw] max-w-md max-h-[85vh] overflow-y-auto no-scrollbar border border-white/80 dark:border-white/10"
                   >
                     <div className="flex items-center justify-between mb-5">
                       <div className="flex items-center gap-2">
-                        <Plus className="w-5 h-5 text-teal-600 animate-pulse" />
-                        <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">
+                        <Plus className="w-5 h-5 text-teal-600 dark:text-teal-400 animate-pulse" />
+                        <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
                           Record New Expense
                         </h3>
                       </div>
                       <button
                         onClick={() => setIsMobileFormOpen(false)}
-                        className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-xl cursor-pointer transition-colors"
+                        className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-xl cursor-pointer transition-colors"
                       >
                         <X className="w-5 h-5" />
                       </button>
@@ -527,6 +551,63 @@ export default function App() {
             </AnimatePresence>
           </>
         )}
+
+        {/* Clear Data Confirmation Popup Modal Overlay */}
+        <AnimatePresence>
+          {isConfirmingClear && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsConfirmingClear(false)}
+                className="fixed inset-0 bg-slate-950/60 backdrop-blur-md z-50"
+              />
+
+              {/* Pop-out Content Container */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.92, x: '-50%', y: '-40%' }}
+                animate={{ opacity: 1, scale: 1, x: '-50%', y: '-50%' }}
+                exit={{ opacity: 0, scale: 0.92, x: '-50%', y: '-40%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 240 }}
+                className="fixed top-1/2 left-1/2 z-55 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-[32px] p-6 shadow-[0_24px_64px_rgba(15,23,42,0.15)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.5)] w-[92vw] max-w-md border border-white/80 dark:border-white/10 space-y-5"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="p-3 bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 rounded-2xl shrink-0 border border-rose-200/40 dark:border-rose-900/40">
+                    <X className="w-6 h-6" />
+                  </div>
+                  <div className="space-y-2 min-w-0">
+                    <h3 className="text-sm font-black uppercase tracking-widest text-slate-800 dark:text-white">
+                      Wipe All Data?
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold leading-relaxed">
+                      This action is permanent and cannot be undone. All custom profiles, monthly salary overrides, and spending transactions will be completely wiped from the database.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-white/5">
+                  <button
+                    onClick={() => setIsConfirmingClear(false)}
+                    className="px-4 py-2 text-xs font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleClearAllData();
+                      setIsConfirmingClear(false);
+                    }}
+                    className="px-4 py-2 text-xs font-black text-white bg-rose-600 hover:bg-rose-700 dark:bg-rose-600 dark:hover:bg-rose-700 rounded-xl cursor-pointer transition-colors"
+                  >
+                    Yes, Clear Everything
+                  </button>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
       </main>
     </div>
   );
