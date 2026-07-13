@@ -496,7 +496,7 @@ export default function App() {
                     animate={{ opacity: 1, scale: 1, x: '-50%', y: '-50%' }}
                     exit={{ opacity: 0, scale: 0.92, x: '-50%', y: '-40%' }}
                     transition={{ type: 'spring', damping: 25, stiffness: 240 }}
-                    className="fixed top-1/2 left-1/2 z-55 bg-white rounded-[32px] p-6 shadow-2xl w-[92vw] max-w-md max-h-[85vh] overflow-y-auto border-2 border-slate-100"
+                    className="fixed top-1/2 left-1/2 z-55 bg-white rounded-[32px] p-6 shadow-2xl w-[92vw] max-w-md max-h-[85vh] overflow-y-auto no-scrollbar border-2 border-slate-100"
                   >
                     <div className="flex items-center justify-between mb-5">
                       <div className="flex items-center gap-2">

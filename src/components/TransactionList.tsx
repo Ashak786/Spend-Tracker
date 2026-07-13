@@ -182,7 +182,7 @@ export default function TransactionList({
             <p className="text-xs text-slate-400 font-semibold">No matching transactions logged.</p>
           </div>
         ) : (
-          <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
+          <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1 no-scrollbar">
             {filteredTransactions.map(t => {
               const meta = CATEGORY_META[t.category] || {
                 icon: Inbox,
@@ -287,7 +287,7 @@ export default function TransactionList({
       {/* Edit Transaction Modal */}
       {editingTx && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs transition-opacity duration-300">
-          <div className="bg-white rounded-3xl border-2 border-slate-200 shadow-2xl w-full max-w-lg overflow-hidden transition-transform duration-300 scale-100">
+          <div className="bg-white rounded-3xl border-2 border-slate-200 shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto no-scrollbar transition-transform duration-300 scale-100">
             {/* Modal Header */}
             <div className="flex items-center justify-between p-5 border-b-2 border-slate-100 bg-slate-50">
               <div className="flex items-center gap-2">
