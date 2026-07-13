@@ -104,9 +104,10 @@ export default function App() {
     const hasNameChanged = currentUser?.name !== targetUser?.name;
     const hasSalaryChanged = currentUser?.salary !== targetUser?.salary;
     const hasIncentiveChanged = (currentUser?.incentive ?? null) !== (targetUser?.incentive ?? null);
+    const hasPhotoUrlChanged = (currentUser?.photoUrl ?? null) !== (targetUser?.photoUrl ?? null);
     const hasMonthlyIncomesChanged = JSON.stringify(currentUser?.monthlyIncomes ?? null) !== JSON.stringify(targetUser?.monthlyIncomes ?? null);
 
-    if (hasIdChanged || hasNameChanged || hasSalaryChanged || hasIncentiveChanged || hasMonthlyIncomesChanged) {
+    if (hasIdChanged || hasNameChanged || hasSalaryChanged || hasIncentiveChanged || hasPhotoUrlChanged || hasMonthlyIncomesChanged) {
       setCurrentUser(targetUser);
     }
     // We intentionally omit currentUser from the dependency array because updates are

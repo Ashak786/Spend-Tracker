@@ -3,6 +3,46 @@ import { UserProfile } from '../types';
 import { formatCurrency } from '../utils';
 import { Users, Plus, Edit2, Check, X, Trash2, Camera } from 'lucide-react';
 
+const compressImage = (base64Str: string, maxWidth = 120, maxHeight = 120): Promise<string> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.src = base64Str;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+
+      // Calculate new dimensions maintaining aspect ratio
+      if (width > height) {
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+      } else {
+        if (height > maxHeight) {
+          width = Math.round((width * maxHeight) / height);
+          height = maxHeight;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(img, 0, 0, width, height);
+        // Compress as jpeg to keep data footprint extremely lightweight (<10KB)
+        resolve(canvas.toDataURL('image/jpeg', 0.7));
+      } else {
+        resolve(base64Str);
+      }
+    };
+    img.onerror = () => {
+      resolve(base64Str);
+    };
+  });
+};
+
 interface UserProfileManagerProps {
   users: UserProfile[];
   currentUser: UserProfile;
@@ -48,24 +88,35 @@ export default function UserProfileManager({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
+    // Support up to 10MB uploads but compress them immediately for super fast performance!
+    if (file.size > 10 * 1024 * 1024) {
       if (isNewProfile) {
-        setAddError('Image size must be less than 2MB.');
+        setAddError('Image size must be less than 10MB.');
       } else {
-        setEditError('Image size must be less than 2MB.');
+        setEditError('Image size must be less than 10MB.');
       }
       return;
     }
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       if (event.target?.result && typeof event.target.result === 'string') {
-        if (isNewProfile) {
-          setNewPhoto(event.target.result);
-          setAddError(null);
-        } else {
-          setEditPhoto(event.target.result);
-          setEditError(null);
+        try {
+          const compressed = await compressImage(event.target.result, 120, 120);
+          if (isNewProfile) {
+            setNewPhoto(compressed);
+            setAddError(null);
+          } else {
+            setEditPhoto(compressed);
+            setEditError(null);
+          }
+        } catch (err) {
+          console.error("Failed compressing uploaded image:", err);
+          if (isNewProfile) {
+            setAddError('Failed to process image.');
+          } else {
+            setEditError('Failed to process image.');
+          }
         }
       }
     };
