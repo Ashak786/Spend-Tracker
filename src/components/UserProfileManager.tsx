@@ -258,7 +258,7 @@ export default function UserProfileManager({
                   if (addError) setAddError(null);
                 }}
                 placeholder="e.g. Ramesh Kumar"
-                className="w-full text-sm px-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
+                className="w-full text-base md:text-sm px-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
               />
             </div>
             <div>
@@ -274,7 +274,7 @@ export default function UserProfileManager({
                   value={newSalary}
                   onChange={e => setNewSalary(e.target.value)}
                   placeholder="e.g. 75000"
-                  className="w-full text-sm pl-8 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 font-bold text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
+                  className="w-full text-base md:text-sm pl-8 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 font-bold text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
                 />
               </div>
             </div>
@@ -290,7 +290,7 @@ export default function UserProfileManager({
                   value={newIncentive}
                   onChange={e => setNewIncentive(e.target.value)}
                   placeholder="e.g. 5000"
-                  className="w-full text-sm pl-8 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 font-bold text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
+                  className="w-full text-base md:text-sm pl-8 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 font-bold text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
                 />
               </div>
             </div>
@@ -365,7 +365,7 @@ export default function UserProfileManager({
               key={u.id}
               className={`relative rounded-2xl sm:rounded-3xl border transition-all flex flex-col justify-between p-4 sm:p-5 ${
                 isSelected
-                  ? 'border-blue-500/80 dark:border-blue-500/50 bg-blue-50 dark:bg-blue-950/40 md:bg-blue-50/50 md:dark:bg-blue-950/20 shadow-md scale-[1.02] backdrop-blur-none md:backdrop-blur-sm'
+                  ? 'border-blue-500/80 dark:border-blue-500/50 bg-blue-50 dark:bg-blue-950/40 md:bg-blue-50/50 md:dark:bg-blue-950/20 shadow-md md:scale-[1.02] backdrop-blur-none md:backdrop-blur-sm'
                   : 'border-white/50 dark:border-white/10 bg-white dark:bg-slate-900 md:bg-white/30 md:dark:bg-slate-900/20 backdrop-blur-none md:backdrop-blur-xs opacity-80 hover:opacity-100 hover:bg-white/50 dark:hover:bg-slate-900/40 hover:shadow-xs'
               }`}
             >
@@ -423,7 +423,7 @@ export default function UserProfileManager({
                           setEditName(e.target.value);
                           if (editError) setEditError(null);
                         }}
-                        className="text-xs font-semibold px-3 py-1.5 border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-slate-100"
+                        className="text-base md:text-xs font-semibold px-3 py-1.5 border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-slate-100"
                       />
                     </div>
                     <div>
@@ -434,7 +434,7 @@ export default function UserProfileManager({
                           type="number"
                           value={editSalary}
                           onChange={e => setEditSalary(e.target.value)}
-                          className="text-xs px-6 py-1.5 border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-800 dark:text-slate-100"
+                          className="text-base md:text-xs px-6 py-1.5 border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-800 dark:text-slate-100"
                         />
                       </div>
                     </div>
@@ -447,7 +447,7 @@ export default function UserProfileManager({
                           value={editIncentive}
                           onChange={e => setEditIncentive(e.target.value)}
                           placeholder="0"
-                          className="text-xs px-6 py-1.5 border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-800 dark:text-slate-100"
+                          className="text-base md:text-xs px-6 py-1.5 border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-800 dark:text-slate-100"
                         />
                       </div>
                     </div>

@@ -150,7 +150,7 @@ export default function TransactionList({
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search items, notes..."
-            className="w-full text-xs pl-10 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-100 dark:bg-slate-900/60 font-bold text-slate-800 dark:text-slate-200 focus:bg-white/90 dark:focus:bg-slate-900/90 transition-all duration-200"
+            className="w-full text-base md:text-xs pl-10 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-100 dark:bg-slate-900/60 font-bold text-slate-800 dark:text-slate-200 focus:bg-white/90 dark:focus:bg-slate-900/90 transition-all duration-200"
           />
         </div>
 
@@ -162,7 +162,7 @@ export default function TransactionList({
           <select
             value={selectedCategoryFilter}
             onChange={e => setSelectedCategoryFilter(e.target.value)}
-            className="w-full sm:w-auto text-xs pl-9 pr-9 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl bg-slate-100 dark:bg-slate-900/60 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer font-bold text-slate-800 dark:text-slate-200 focus:bg-white/90 dark:focus:bg-slate-900/90 transition-all duration-200"
+            className="w-full sm:w-auto text-base md:text-xs pl-9 pr-9 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl bg-slate-100 dark:bg-slate-900/60 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer font-bold text-slate-800 dark:text-slate-200 focus:bg-white/90 dark:focus:bg-slate-900/90 transition-all duration-200"
           >
             <option value="All">All Categories</option>
             {Object.keys(CATEGORY_META).map(cat => (

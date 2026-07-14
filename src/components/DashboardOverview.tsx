@@ -116,7 +116,7 @@ export default function DashboardOverview({
                     min="1"
                     value={tempSalary}
                     onChange={e => setTempSalary(e.target.value)}
-                    className="w-full text-xs font-bold bg-blue-800 dark:bg-blue-900 border border-blue-500 dark:border-blue-700 rounded-lg px-2 py-1 text-white focus:outline-none focus:ring-1 focus:ring-blue-300"
+                    className="w-full text-base md:text-xs font-bold bg-blue-800 dark:bg-blue-900 border border-blue-500 dark:border-blue-700 rounded-lg px-2 py-1 text-white focus:outline-none focus:ring-1 focus:ring-blue-300"
                   />
                 </div>
                 <div>
@@ -127,7 +127,7 @@ export default function DashboardOverview({
                     value={tempIncentive}
                     onChange={e => setTempIncentive(e.target.value)}
                     placeholder="0"
-                    className="w-full text-xs font-bold bg-blue-800 dark:bg-blue-900 border border-blue-500 dark:border-blue-700 rounded-lg px-2 py-1 text-white focus:outline-none focus:ring-1 focus:ring-blue-300"
+                    className="w-full text-base md:text-xs font-bold bg-blue-800 dark:bg-blue-900 border border-blue-500 dark:border-blue-700 rounded-lg px-2 py-1 text-white focus:outline-none focus:ring-1 focus:ring-blue-300"
                   />
                 </div>
               </div>

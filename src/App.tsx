@@ -285,11 +285,12 @@ export default function App() {
             </div>
 
             {currentUser && (
-              <div className="flex items-center gap-2 sm:gap-3 bg-white/40 dark:bg-slate-950/20 px-3.5 py-2 rounded-2xl border border-white/60 dark:border-white/5 shadow-xs">
+              <div id="header-user-badge" className="flex items-center gap-2 sm:gap-3 bg-white/40 dark:bg-slate-950/20 px-3.5 py-2 rounded-2xl border border-white/60 dark:border-white/5 shadow-xs transition-all hover:bg-white/60 dark:hover:bg-slate-950/30">
                 <img
-                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(currentUser.name)}`}
+                  src={currentUser.photoUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(currentUser.name)}`}
                   alt={currentUser.name}
-                  className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shrink-0"
+                  referrerPolicy="no-referrer"
+                  className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shrink-0 object-cover"
                 />
                 <div className="text-right hidden sm:block">
                   <p className="text-[8px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">Active Profile</p>
@@ -352,7 +353,7 @@ export default function App() {
                   type="text"
                   required
                   placeholder="e.g. Ramesh Kumar"
-                  className="w-full text-sm px-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 font-bold text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
+                  className="w-full text-base md:text-sm px-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 font-bold text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
                 />
               </div>
 
@@ -367,7 +368,7 @@ export default function App() {
                     type="number"
                     required
                     placeholder="e.g. 75000"
-                    className="w-full text-sm pl-8 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 font-bold text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
+                    className="w-full text-base md:text-sm pl-8 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 font-bold text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
                   />
                 </div>
                 <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-semibold">
@@ -386,7 +387,7 @@ export default function App() {
                     type="number"
                     min="0"
                     placeholder="e.g. 5000"
-                    className="w-full text-sm pl-8 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 font-bold text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
+                    className="w-full text-base md:text-sm pl-8 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 font-bold text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
                   />
                 </div>
               </div>

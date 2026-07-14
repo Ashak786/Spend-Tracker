@@ -13,8 +13,10 @@ export function LogoIcon({ size = 48, className = '' }: LogoIconProps) {
       <img
         src="https://lh3.googleusercontent.com/d/1nm8tjDQZ2x4j_ZOjtcwRdtqMpIOhsDUJ"
         alt="SpendWisely Logo"
-        className={`${className} object-contain rounded-xl`}
-        style={{ width: size, height: size }}
+        width={size}
+        height={size}
+        className={`${className} object-contain rounded-xl max-w-none`}
+        style={{ width: `${size}px`, height: `${size}px` }}
         referrerPolicy="no-referrer"
         onError={() => setUseFallback(true)}
       />
