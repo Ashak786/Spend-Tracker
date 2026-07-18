@@ -496,11 +496,11 @@ export default function App() {
           <>
             <button
               onClick={() => setIsMobileFormOpen(true)}
-              className="fixed bottom-6 right-6 z-40 md:hidden bg-blue-600 hover:bg-blue-500 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-[0_8px_30px_rgba(37,99,235,0.4)] active:scale-95 transition-all duration-200 border-2 border-white dark:border-slate-900 cursor-pointer group"
+              className="fixed bottom-6 right-6 z-40 md:hidden bg-blue-600 active:bg-blue-700 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-[0_8px_30px_rgba(37,99,235,0.4)] active:scale-90 transition-all duration-150 border-2 border-white dark:border-slate-900 cursor-pointer select-none touch-manipulation transform-gpu will-change-transform group"
               style={{ bottom: '24px', right: '24px' }}
               aria-label="Add Expense"
             >
-              <Plus className="w-7 h-7 transition-transform duration-300 group-hover:rotate-90" />
+              <Plus className="w-7 h-7 transition-transform duration-200 transform-gpu group-active:rotate-90" />
             </button>
           </>
         )}
@@ -515,16 +515,16 @@ export default function App() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setIsMobileFormOpen(false)}
-                className="fixed inset-0 bg-slate-950/50 backdrop-blur-md z-50"
+                className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 transform-gpu"
               />
 
               {/* Pop-out Content Container */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.92, x: '-50%', y: '-40%' }}
+                initial={{ opacity: 0, scale: 0.95, x: '-50%', y: '-48%' }}
                 animate={{ opacity: 1, scale: 1, x: '-50%', y: '-50%' }}
-                exit={{ opacity: 0, scale: 0.92, x: '-50%', y: '-40%' }}
-                transition={{ type: 'spring', damping: 25, stiffness: 240 }}
-                className="fixed top-1/2 left-1/2 z-[60] bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[32px] p-6 shadow-[0_24px_64px_rgba(15,23,42,0.15)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.4)] w-[92vw] max-w-md max-h-[85vh] overflow-y-auto no-scrollbar border border-white/80 dark:border-white/10"
+                exit={{ opacity: 0, scale: 0.95, x: '-50%', y: '-48%' }}
+                transition={{ type: 'spring', damping: 28, stiffness: 280 }}
+                className="fixed top-1/2 left-1/2 z-[60] bg-white dark:bg-slate-900 rounded-[28px] p-6 shadow-[0_24px_60px_rgba(15,23,42,0.2)] dark:shadow-[0_24px_60px_rgba(0,0,0,0.5)] w-[92vw] max-w-md max-h-[82vh] overflow-y-auto no-scrollbar border border-slate-100 dark:border-slate-800 transform-gpu will-change-transform"
               >
                 <div className="flex items-center justify-between mb-5">
                   <div className="flex items-center gap-2">
