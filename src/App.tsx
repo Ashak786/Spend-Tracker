@@ -492,67 +492,67 @@ export default function App() {
         </footer>
 
         {/* Floating Action Button for Mobile Expense Addition */}
-        {currentUser && (
+        {currentUser && !isMobileFormOpen && (
           <>
             <button
               onClick={() => setIsMobileFormOpen(true)}
-              className="fixed bottom-6 right-6 z-40 md:hidden bg-teal-600 hover:bg-teal-500 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-[0_8px_30px_rgb(13,148,136,0.4)] active:scale-95 transition-all duration-200 border-2 border-white dark:border-slate-900 cursor-pointer group"
+              className="fixed bottom-6 right-6 z-40 md:hidden bg-blue-600 hover:bg-blue-500 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-[0_8px_30px_rgba(37,99,235,0.4)] active:scale-95 transition-all duration-200 border-2 border-white dark:border-slate-900 cursor-pointer group"
               style={{ bottom: '24px', right: '24px' }}
               aria-label="Add Expense"
             >
               <Plus className="w-7 h-7 transition-transform duration-300 group-hover:rotate-90" />
             </button>
-
-            {/* Mobile Form Pop-out Modal Overlay */}
-            <AnimatePresence>
-              {isMobileFormOpen && (
-                <>
-                  {/* Backdrop */}
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    onClick={() => setIsMobileFormOpen(false)}
-                    className="fixed inset-0 bg-slate-950/50 backdrop-blur-md z-50"
-                  />
-
-                  {/* Pop-out Content Container */}
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.92, x: '-50%', y: '-40%' }}
-                    animate={{ opacity: 1, scale: 1, x: '-50%', y: '-50%' }}
-                    exit={{ opacity: 0, scale: 0.92, x: '-50%', y: '-40%' }}
-                    transition={{ type: 'spring', damping: 25, stiffness: 240 }}
-                    className="fixed top-1/2 left-1/2 z-55 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[32px] p-6 shadow-[0_24px_64px_rgba(15,23,42,0.15)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.4)] w-[92vw] max-w-md max-h-[85vh] overflow-y-auto no-scrollbar border border-white/80 dark:border-white/10"
-                  >
-                    <div className="flex items-center justify-between mb-5">
-                      <div className="flex items-center gap-2">
-                        <Plus className="w-5 h-5 text-teal-600 dark:text-teal-400 animate-pulse" />
-                        <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
-                          Record New Expense
-                        </h3>
-                      </div>
-                      <button
-                        onClick={() => setIsMobileFormOpen(false)}
-                        className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-xl cursor-pointer transition-colors"
-                      >
-                        <X className="w-5 h-5" />
-                      </button>
-                    </div>
-
-                    {/* Actual form body */}
-                    <TransactionForm
-                      userId={currentUser.id}
-                      onAddTransaction={handleAddTransaction}
-                      onSuccess={() => setIsMobileFormOpen(false)}
-                      selectedMonth={selectedMonth}
-                      isModal={true}
-                    />
-                  </motion.div>
-                </>
-              )}
-            </AnimatePresence>
           </>
         )}
+
+        {/* Mobile Form Pop-out Modal Overlay */}
+        <AnimatePresence>
+          {isMobileFormOpen && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsMobileFormOpen(false)}
+                className="fixed inset-0 bg-slate-950/50 backdrop-blur-md z-50"
+              />
+
+              {/* Pop-out Content Container */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.92, x: '-50%', y: '-40%' }}
+                animate={{ opacity: 1, scale: 1, x: '-50%', y: '-50%' }}
+                exit={{ opacity: 0, scale: 0.92, x: '-50%', y: '-40%' }}
+                transition={{ type: 'spring', damping: 25, stiffness: 240 }}
+                className="fixed top-1/2 left-1/2 z-[60] bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[32px] p-6 shadow-[0_24px_64px_rgba(15,23,42,0.15)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.4)] w-[92vw] max-w-md max-h-[85vh] overflow-y-auto no-scrollbar border border-white/80 dark:border-white/10"
+              >
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-2">
+                    <Plus className="w-5 h-5 text-blue-600 dark:text-blue-400 animate-pulse" />
+                    <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                      Record New Expense
+                    </h3>
+                  </div>
+                  <button
+                    onClick={() => setIsMobileFormOpen(false)}
+                    className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-xl cursor-pointer transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* Actual form body */}
+                <TransactionForm
+                  userId={currentUser!.id}
+                  onAddTransaction={handleAddTransaction}
+                  onSuccess={() => setIsMobileFormOpen(false)}
+                  selectedMonth={selectedMonth}
+                  isModal={true}
+                />
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
 
         {/* Clear Data Confirmation Popup Modal Overlay */}
         <AnimatePresence>
@@ -573,7 +573,7 @@ export default function App() {
                 animate={{ opacity: 1, scale: 1, x: '-50%', y: '-50%' }}
                 exit={{ opacity: 0, scale: 0.92, x: '-50%', y: '-40%' }}
                 transition={{ type: 'spring', damping: 25, stiffness: 240 }}
-                className="fixed top-1/2 left-1/2 z-55 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-[32px] p-6 shadow-[0_24px_64px_rgba(15,23,42,0.15)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.5)] w-[92vw] max-w-md border border-white/80 dark:border-white/10 space-y-5"
+                className="fixed top-1/2 left-1/2 z-[60] bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-[32px] p-6 shadow-[0_24px_64px_rgba(15,23,42,0.15)] dark:shadow-[0_24px_64px_rgba(0,0,0,0.5)] w-[92vw] max-w-md border border-white/80 dark:border-white/10 space-y-5"
               >
                 <div className="flex items-start gap-4">
                   <div className="p-3 bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 rounded-2xl shrink-0 border border-rose-200/40 dark:border-rose-900/40">
