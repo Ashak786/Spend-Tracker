@@ -515,7 +515,7 @@ export default function App() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setIsMobileFormOpen(false)}
-                className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 transform-gpu"
+                className="fixed inset-0 bg-slate-950/60 z-50"
               />
 
               {/* Pop-out Content Container */}
@@ -524,7 +524,7 @@ export default function App() {
                 animate={{ opacity: 1, scale: 1, x: '-50%', y: '-50%' }}
                 exit={{ opacity: 0, scale: 0.95, x: '-50%', y: '-48%' }}
                 transition={{ type: 'spring', damping: 28, stiffness: 280 }}
-                className="fixed top-1/2 left-1/2 z-[60] bg-white dark:bg-slate-900 rounded-[28px] p-6 shadow-[0_24px_60px_rgba(15,23,42,0.2)] dark:shadow-[0_24px_60px_rgba(0,0,0,0.5)] w-[92vw] max-w-md max-h-[82vh] overflow-y-auto no-scrollbar border border-slate-100 dark:border-slate-800 transform-gpu will-change-transform"
+                className="fixed top-1/2 left-1/2 z-[60] bg-white dark:bg-slate-900 rounded-[28px] p-6 shadow-[0_24px_60px_rgba(15,23,42,0.2)] dark:shadow-[0_24px_60px_rgba(0,0,0,0.5)] w-[92vw] max-w-md max-h-[82vh] overflow-y-auto no-scrollbar border border-slate-200 dark:border-slate-800"
               >
                 <div className="flex items-center justify-between mb-5">
                   <div className="flex items-center gap-2">

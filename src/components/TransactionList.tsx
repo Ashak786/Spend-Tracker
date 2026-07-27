@@ -286,19 +286,19 @@ export default function TransactionList({
 
       {/* Edit Transaction Modal */}
       {editingTx && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md transition-all duration-300">
-          <div className="bg-white/75 dark:bg-slate-900/80 backdrop-blur-2xl rounded-3xl border border-white/80 dark:border-white/10 shadow-2xl dark:shadow-[0_24px_64px_rgba(0,0,0,0.5)] w-full max-w-lg max-h-[90vh] overflow-y-auto no-scrollbar transition-all duration-300 scale-100 animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 transition-opacity duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto no-scrollbar scale-100 animate-in fade-in zoom-in-95 duration-150">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-5 border-b border-white/60 dark:border-white/5 bg-white/40 dark:bg-slate-950/30">
+            <div className="flex items-center justify-between p-5 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/50">
               <div className="flex items-center gap-2">
-                <Pencil className="w-4 h-4 text-blue-600 dark:text-blue-400 animate-pulse" />
+                <Pencil className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                 <h3 className="text-xs font-black uppercase tracking-widest text-slate-700 dark:text-slate-200">
                   Edit Transaction
                 </h3>
               </div>
               <button
                 onClick={() => setEditingTx(null)}
-                className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 p-1 hover:bg-white/60 dark:hover:bg-slate-900/60 rounded-lg transition-colors cursor-pointer"
+                className="text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 p-1 hover:bg-slate-200/60 dark:hover:bg-slate-800/60 rounded-lg transition-colors cursor-pointer"
                 title="Close"
               >
                 <X className="w-5 h-5" />
@@ -340,7 +340,7 @@ export default function TransactionList({
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
                   placeholder="e.g. Jio Fiber Bill, Swiggy Dinner"
-                  className="w-full text-sm px-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/40 dark:bg-slate-900/30 backdrop-blur-xs font-bold text-slate-800 dark:text-slate-200 focus:bg-white/90 dark:focus:bg-slate-900/90 transition-all duration-200"
+                  className="w-full text-base md:text-sm px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-800 font-bold text-slate-800 dark:text-slate-200 focus:bg-white dark:focus:bg-slate-900 transition-colors duration-150"
                 />
               </div>
 
@@ -361,7 +361,7 @@ export default function TransactionList({
                       value={editAmount}
                       onChange={(e) => setEditAmount(e.target.value)}
                       placeholder="0.00 (or e.g. 150+45)"
-                      className="w-full text-sm pl-8 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/40 dark:bg-slate-900/30 backdrop-blur-xs font-bold text-slate-800 dark:text-slate-200 focus:bg-white/90 dark:focus:bg-slate-900/90 transition-all duration-200"
+                      className="w-full text-base md:text-sm pl-8 pr-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-800 font-bold text-slate-800 dark:text-slate-200 focus:bg-white dark:focus:bg-slate-900 transition-colors duration-150"
                     />
                   </div>
                   {isEquation && (
@@ -386,7 +386,7 @@ export default function TransactionList({
                   <select
                     value={editCategory}
                     onChange={(e) => setEditCategory(e.target.value as CategoryType)}
-                    className="w-full text-sm px-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/40 dark:bg-slate-900/30 backdrop-blur-xs cursor-pointer font-bold text-slate-800 dark:text-slate-200 focus:bg-white/90 dark:focus:bg-slate-900/90 transition-all duration-200"
+                    className="w-full text-base md:text-sm px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-800 cursor-pointer font-bold text-slate-800 dark:text-slate-200 focus:bg-white dark:focus:bg-slate-900 transition-colors duration-150"
                   >
                     {Object.keys(CATEGORY_META).map((catKey) => (
                       <option key={catKey} value={catKey}>
@@ -408,7 +408,7 @@ export default function TransactionList({
                     required
                     value={editDate}
                     onChange={(e) => setEditDate(e.target.value)}
-                    className="w-full text-sm px-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/40 dark:bg-slate-900/30 backdrop-blur-xs cursor-pointer font-bold text-slate-800 dark:text-slate-200 focus:bg-white/90 dark:focus:bg-slate-900/90 transition-all duration-200"
+                    className="w-full text-base md:text-sm px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-800 cursor-pointer font-bold text-slate-800 dark:text-slate-200 focus:bg-white dark:focus:bg-slate-900 transition-colors duration-150"
                   />
                 </div>
 
@@ -421,23 +421,23 @@ export default function TransactionList({
                     value={editDescription}
                     onChange={(e) => setEditDescription(e.target.value)}
                     placeholder="e.g. Paid via UPI"
-                    className="w-full text-sm px-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white/40 dark:bg-slate-900/30 font-bold text-slate-800 dark:text-slate-200 focus:bg-white/90 dark:focus:bg-slate-900/90 transition-all duration-200"
+                    className="w-full text-base md:text-sm px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-800 font-bold text-slate-800 dark:text-slate-200 focus:bg-white dark:focus:bg-slate-900 transition-colors duration-150"
                   />
                 </div>
               </div>
 
               {/* Footer Actions */}
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/60 dark:border-white/5">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200/80 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setEditingTx(null)}
-                  className="px-4 py-2 text-xs font-bold text-slate-500 dark:text-slate-400 hover:bg-white/65 dark:hover:bg-slate-800/80 bg-white/40 dark:bg-slate-900/30 backdrop-blur-xs rounded-xl border border-slate-200/60 dark:border-white/10 transition-colors cursor-pointer"
+                  className="px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200/70 dark:hover:bg-slate-800 bg-slate-100 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 text-xs font-black text-white bg-blue-600 hover:bg-blue-500 rounded-xl shadow-md transition-all cursor-pointer"
+                  className="px-5 py-2 text-xs font-black text-white bg-blue-600 hover:bg-blue-500 rounded-xl shadow-md transition-colors cursor-pointer"
                 >
                   Save Changes
                 </button>
