@@ -307,7 +307,7 @@ export default function TransactionList({
 
             {/* Modal Body / Form */}
             <form
-              onSubmit={async (e) => {
+              onSubmit={(e) => {
                 e.preventDefault();
                 if (!editTitle.trim() || !editAmount) return;
                 
@@ -316,7 +316,7 @@ export default function TransactionList({
                 
                 if (isNaN(parsedAmount) || parsedAmount <= 0) return;
                 
-                await onUpdateTransaction({
+                onUpdateTransaction({
                   ...editingTx,
                   title: editTitle.trim(),
                   amount: Number(parsedAmount.toFixed(2)),

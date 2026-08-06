@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { CategoryType, Transaction } from '../types';
 import { CATEGORY_META } from './ExpenseCategoryList';
 import { PlusCircle, Calendar, IndianRupee, Tag, FileText } from 'lucide-react';
-import { formatCurrency } from '../utils';
+import { formatCurrency, getCurrentDateKey, getCurrentMonthKey } from '../utils';
 
 interface TransactionFormProps {
   userId: string;
@@ -25,10 +25,9 @@ export default function TransactionForm({
   
   // Set default date to today or the selectedMonth's first day
   const getTodayDateString = () => {
-    const today = new Date();
-    const currentMonthStr = today.toISOString().slice(0, 7); // YYYY-MM
+    const currentMonthStr = getCurrentMonthKey();
     if (currentMonthStr === selectedMonth) {
-      return today.toISOString().slice(0, 10); // YYYY-MM-DD
+      return getCurrentDateKey();
     } else {
       return `${selectedMonth}-01`;
     }
@@ -122,7 +121,6 @@ export default function TransactionForm({
             <span className="absolute left-4 top-2.5 text-slate-400 dark:text-slate-500 text-sm font-black">₹</span>
             <input
               type="text"
-              inputMode="decimal"
               required
               value={amount}
               onChange={e => setAmount(e.target.value)}

@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { UserProfile, Transaction } from './types';
+import { getCurrentMonthKey, getCurrentDateKey } from './utils';
 import UserProfileManager from './components/UserProfileManager';
 import DashboardOverview from './components/DashboardOverview';
 import ExpenseCategoryList from './components/ExpenseCategoryList';
@@ -32,7 +33,7 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedMonth, setSelectedMonth] = useState('2026-07');
+  const [selectedMonth, setSelectedMonth] = useState(getCurrentMonthKey);
   const [isConfirmingClear, setIsConfirmingClear] = useState(false);
   const [isMobileFormOpen, setIsMobileFormOpen] = useState(false);
 
@@ -173,23 +174,27 @@ export default function App() {
   };
 
   // Handler to add a new profile
-  const handleAddUser = async (name: string, salary: number, incentive?: number | null, photoUrl?: string) => {
+  const handleAddUser = (name: string, salary: number, incentive?: number | null, photoUrl?: string) => {
     const newUser: UserProfile = {
       id: `user-${Date.now()}`,
       name,
       salary,
       incentive: incentive ?? null,
-      joinedAt: new Date().toISOString().slice(0, 10),
+      joinedAt: getCurrentDateKey(),
       photoUrl,
     };
-    await saveUserProfile(newUser);
+    setUsers(prev => [...prev, newUser]);
     setCurrentUser(newUser); // Automatically switch to the newly created profile
+    saveUserProfile(newUser).catch(err => console.error('Failed to save user profile:', err));
   };
 
   // Handler to update name or salary of active profile
-  const handleUpdateUser = async (updatedUser: UserProfile) => {
-    await saveUserProfile(updatedUser);
-    setCurrentUser(updatedUser);
+  const handleUpdateUser = (updatedUser: UserProfile) => {
+    setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
+    if (currentUser?.id === updatedUser.id) {
+      setCurrentUser(updatedUser);
+    }
+    saveUserProfile(updatedUser).catch(err => console.error('Failed to update user profile:', err));
   };
 
   // Handler to delete a user profile
@@ -203,33 +208,45 @@ export default function App() {
         setCurrentUser(null);
       }
     }
+    setUsers(prev => prev.filter(u => u.id !== userId));
     await deleteUserProfileAndData(userId);
   };
 
   // Handler to record a transaction
-  const handleAddTransaction = async (newTxData: Omit<Transaction, 'id'>) => {
+  const handleAddTransaction = (newTxData: Omit<Transaction, 'id'>) => {
     const newTx: Transaction = {
       ...newTxData,
       id: `tx-${Date.now()}`,
     };
-    await saveTransaction(newTx);
     
+    // Optimistically update local transaction list for immediate UI responsiveness
+    setTransactions(prev => [newTx, ...prev]);
+
     // Update selectedMonth if the added transaction belongs to a different month
     const addedMonth = newTxData.date.slice(0, 7); // YYYY-MM
     setSelectedMonth(addedMonth);
     
     // Auto-close mobile drawer/modal if open
     setIsMobileFormOpen(false);
+
+    // Save to Firestore in background
+    saveTransaction(newTx).catch(err => console.error('Failed to save transaction:', err));
   };
 
   // Handler to delete a transaction
-  const handleDeleteTransaction = async (id: string) => {
-    await deleteTransactionFromDb(id);
+  const handleDeleteTransaction = (id: string) => {
+    // Optimistically update local transaction list
+    setTransactions(prev => prev.filter(t => t.id !== id));
+
+    deleteTransactionFromDb(id).catch(err => console.error('Failed to delete transaction:', err));
   };
 
   // Handler to update an existing transaction
-  const handleUpdateTransaction = async (updatedTx: Transaction) => {
-    await saveTransaction(updatedTx);
+  const handleUpdateTransaction = (updatedTx: Transaction) => {
+    // Optimistically update local transaction list
+    setTransactions(prev => prev.map(t => t.id === updatedTx.id ? updatedTx : t));
+
+    saveTransaction(updatedTx).catch(err => console.error('Failed to update transaction:', err));
   };
 
   // Only get transactions belonging to the current active user
@@ -239,11 +256,11 @@ export default function App() {
   }, [transactions, currentUser]);
 
   // Calculate available months from current user's logged transactions (to populate dropdown)
-  // Ensure that at least '2026-07' and '2026-06' are always present
+  // Ensures the current month and any transaction/monthlyIncome months are included
   const availableMonths = React.useMemo(() => {
     const monthsSet = new Set<string>();
-    monthsSet.add('2026-07');
-    monthsSet.add('2026-06');
+    const currentMonth = getCurrentMonthKey();
+    monthsSet.add(currentMonth);
     
     currentUserTransactions.forEach(t => {
       const monthStr = t.date.slice(0, 7); // YYYY-MM
@@ -252,15 +269,23 @@ export default function App() {
       }
     });
 
+    if (currentUser?.monthlyIncomes) {
+      Object.keys(currentUser.monthlyIncomes).forEach(m => {
+        if (/^\d{4}-\d{2}$/.test(m)) {
+          monthsSet.add(m);
+        }
+      });
+    }
+
     return Array.from(monthsSet).sort().reverse(); // Sort descending (newest months first)
-  }, [currentUserTransactions]);
+  }, [currentUserTransactions, currentUser]);
 
   // Wipe all data to start with a fresh clean slate (completely removes storage items)
   const handleClearAllData = async () => {
     await wipeAllDataFromDb();
     setCurrentUser(null);
     localStorage.removeItem(LOCAL_STORAGE_ACTIVE_USER_KEY);
-    setSelectedMonth('2026-07');
+    setSelectedMonth(getCurrentMonthKey());
   };
 
   return (

@@ -1,6 +1,25 @@
 import { Transaction, UserProfile } from './types';
 
 /**
+ * Returns current month string in YYYY-MM format based on local system time.
+ */
+export function getCurrentMonthKey(d = new Date()): string {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  return `${year}-${month}`;
+}
+
+/**
+ * Returns current date string in YYYY-MM-DD format based on local system time.
+ */
+export function getCurrentDateKey(d = new Date()): string {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/**
  * Formats a number to Indian Rupee currency format (e.g., ₹1,50,000).
  * Handles the unique Indian dual-comma system.
  */
