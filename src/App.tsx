@@ -487,34 +487,7 @@ export default function App() {
           </>
         )}
 
-        {/* Footer */}
-        <footer className="bg-white dark:bg-slate-900 md:bg-white/40 md:dark:bg-slate-900/30 backdrop-blur-none md:backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-4 sm:p-6 shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] mt-4 sm:mt-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="text-left space-y-1">
-              <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px]">
-                <Sparkles className="w-4 h-4 text-teal-600 dark:text-teal-400" />
-                <span>Spend Wisely Tracker</span>
-              </div>
-              <p className="text-[10px] text-teal-500 dark:text-teal-400 font-bold uppercase tracking-widest flex items-center gap-1">
-                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse inline-block"></span>
-                Cloud Ledger Synchronized
-              </p>
-            </div>
 
-            <div className="shrink-0">
-              {(users.length > 0 || transactions.length > 0) && (
-                <button
-                  onClick={() => setIsConfirmingClear(true)}
-                  className="flex items-center gap-1.5 px-3.5 py-2 text-red-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/10 hover:border-red-200 dark:hover:border-red-900/40 shadow-xs transition-all duration-300 text-xs font-bold cursor-pointer"
-                  aria-label="Clear Data"
-                >
-                  <X className="w-4 h-4 shrink-0" />
-                  <span>Clear All Data</span>
-                </button>
-              )}
-            </div>
-          </div>
-        </footer>
 
         {/* Floating Action Button for Mobile Expense Addition */}
         {currentUser && !isMobileFormOpen && (
