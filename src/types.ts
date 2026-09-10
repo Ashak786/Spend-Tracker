@@ -27,6 +27,8 @@ export type CategoryType =
   | 'Credit Card'
   | 'Other Expenses';
 
+export type BudgetBucket = 'Needs' | 'Wants' | 'Savings';
+
 export interface CategoryBudget {
   category: CategoryType;
   limit: number; // budget limit for this category
@@ -38,6 +40,7 @@ export interface Transaction {
   title: string;
   amount: number;
   category: CategoryType;
+  budgetBucket?: BudgetBucket;
   date: string; // YYYY-MM-DD
   description?: string;
   isRecurring?: boolean;

@@ -277,6 +277,34 @@ export default function UserProfileManager({
                   className="w-full text-base md:text-sm pl-8 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 font-bold text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
                 />
               </div>
+              {parseFloat(newSalary) > 0 && (
+                <div className="mt-2.5 bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/40 rounded-2xl p-3 text-xs space-y-1.5 animate-fade-in">
+                  <div className="flex items-center justify-between text-[10px] font-black text-blue-800 dark:text-blue-300 uppercase tracking-wider">
+                    <span>⚡ Auto 50-30-20 Salary Split</span>
+                    <span className="font-mono">{formatCurrency(parseFloat(newSalary))}</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-1.5 text-center">
+                    <div className="bg-white/90 dark:bg-slate-900/80 p-2 rounded-xl border border-blue-100 dark:border-blue-900/30">
+                      <div className="text-[9px] font-bold text-blue-600 dark:text-blue-400">50% Needs</div>
+                      <div className="font-black text-slate-800 dark:text-slate-100 font-mono text-[11px] mt-0.5">
+                        {formatCurrency(parseFloat(newSalary) * 0.50)}
+                      </div>
+                    </div>
+                    <div className="bg-white/90 dark:bg-slate-900/80 p-2 rounded-xl border border-purple-100 dark:border-purple-900/30">
+                      <div className="text-[9px] font-bold text-purple-600 dark:text-purple-400">30% Wants</div>
+                      <div className="font-black text-slate-800 dark:text-slate-100 font-mono text-[11px] mt-0.5">
+                        {formatCurrency(parseFloat(newSalary) * 0.30)}
+                      </div>
+                    </div>
+                    <div className="bg-white/90 dark:bg-slate-900/80 p-2 rounded-xl border border-emerald-100 dark:border-emerald-900/30">
+                      <div className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400">20% Savings</div>
+                      <div className="font-black text-slate-800 dark:text-slate-100 font-mono text-[11px] mt-0.5">
+                        {formatCurrency(parseFloat(newSalary) * 0.20)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             <div className="md:col-span-2">
               <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
@@ -437,6 +465,25 @@ export default function UserProfileManager({
                           className="text-base md:text-xs px-6 py-1.5 border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-800 dark:text-slate-100"
                         />
                       </div>
+                      {parseFloat(editSalary) > 0 && (
+                        <div className="mt-1.5 p-2 bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/40 rounded-xl text-[9px] space-y-1">
+                          <div className="font-black text-blue-800 dark:text-blue-300 uppercase">Auto 50-30-20 Split</div>
+                          <div className="grid grid-cols-3 gap-1 text-center font-bold">
+                            <div className="bg-white dark:bg-slate-900 p-1 rounded-lg border border-blue-100 dark:border-blue-900/30">
+                              <span className="text-blue-600 block text-[8px]">50% Needs</span>
+                              <span className="font-mono font-black">{formatCurrency(parseFloat(editSalary) * 0.5)}</span>
+                            </div>
+                            <div className="bg-white dark:bg-slate-900 p-1 rounded-lg border border-purple-100 dark:border-purple-900/30">
+                              <span className="text-purple-600 block text-[8px]">30% Wants</span>
+                              <span className="font-mono font-black">{formatCurrency(parseFloat(editSalary) * 0.3)}</span>
+                            </div>
+                            <div className="bg-white dark:bg-slate-900 p-1 rounded-lg border border-emerald-100 dark:border-emerald-900/30">
+                              <span className="text-emerald-600 block text-[8px]">20% Savings</span>
+                              <span className="font-mono font-black">{formatCurrency(parseFloat(editSalary) * 0.2)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                     <div>
                       <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 block mb-0.5">Incentive / Bonus (Optional)</span>

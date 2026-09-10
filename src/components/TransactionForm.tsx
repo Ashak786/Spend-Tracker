@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { CategoryType, Transaction } from '../types';
+import { CategoryType, Transaction, BudgetBucket } from '../types';
 import { CATEGORY_META } from './ExpenseCategoryList';
 import { PlusCircle, Calendar, IndianRupee, Tag, FileText } from 'lucide-react';
-import { formatCurrency, getCurrentDateKey, getCurrentMonthKey } from '../utils';
+import { formatCurrency, getCurrentDateKey, getCurrentMonthKey, getDefaultBudgetBucket } from '../utils';
 
 interface TransactionFormProps {
   userId: string;
@@ -22,6 +22,7 @@ export default function TransactionForm({
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState<CategoryType>('Food & Groceries');
+  const [budgetBucket, setBudgetBucket] = useState<BudgetBucket>(getDefaultBudgetBucket('Food & Groceries'));
   
   // Set default date to today or the selectedMonth's first day
   const getTodayDateString = () => {
@@ -35,6 +36,11 @@ export default function TransactionForm({
 
   const [date, setDate] = useState(getTodayDateString());
   const [description, setDescription] = useState('');
+
+  const handleCategoryChange = (newCat: CategoryType) => {
+    setCategory(newCat);
+    setBudgetBucket(getDefaultBudgetBucket(newCat));
+  };
 
   // Helper to parse/evaluate basic math safely
   const evaluateMath = (val: string): number | null => {
@@ -77,6 +83,7 @@ export default function TransactionForm({
       title: title.trim(),
       amount: Number(parsedAmount.toFixed(2)),
       category,
+      budgetBucket,
       date,
       description: description.trim() || undefined,
     });
@@ -150,7 +157,7 @@ export default function TransactionForm({
           </label>
           <select
             value={category}
-            onChange={e => setCategory(e.target.value as CategoryType)}
+            onChange={e => handleCategoryChange(e.target.value as CategoryType)}
             className="w-full text-base md:text-sm px-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 cursor-pointer font-bold text-slate-800 dark:text-slate-200 focus:bg-white/90 dark:focus:bg-slate-900/90 transition-all duration-200"
           >
             {Object.keys(CATEGORY_META).map(catKey => (
@@ -159,6 +166,54 @@ export default function TransactionForm({
               </option>
             ))}
           </select>
+        </div>
+      </div>
+
+      {/* Manual 50/30/20 Budget Bucket Selector */}
+      <div>
+        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 flex items-center justify-between">
+          <span>50 / 30 / 20 Budget Rule Allocation</span>
+          <span className="text-[10px] text-blue-600 dark:text-blue-400 font-bold">Select Category Bucket</span>
+        </label>
+        <div className="grid grid-cols-3 gap-2">
+          <button
+            type="button"
+            onClick={() => setBudgetBucket('Needs')}
+            className={`py-2 px-2 rounded-2xl border text-xs font-black transition-all cursor-pointer flex flex-col items-center gap-0.5 ${
+              budgetBucket === 'Needs'
+                ? 'bg-blue-600 text-white border-blue-600 shadow-md scale-[1.02]'
+                : 'bg-slate-100 dark:bg-slate-900/60 text-slate-600 dark:text-slate-300 border-slate-200/60 dark:border-white/10 hover:bg-slate-200/70 dark:hover:bg-slate-800'
+            }`}
+          >
+            <span>🏠 50% Needs</span>
+            <span className="text-[9px] font-medium opacity-80">Rent, Bills & Food</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setBudgetBucket('Wants')}
+            className={`py-2 px-2 rounded-2xl border text-xs font-black transition-all cursor-pointer flex flex-col items-center gap-0.5 ${
+              budgetBucket === 'Wants'
+                ? 'bg-purple-600 text-white border-purple-600 shadow-md scale-[1.02]'
+                : 'bg-slate-100 dark:bg-slate-900/60 text-slate-600 dark:text-slate-300 border-slate-200/60 dark:border-white/10 hover:bg-slate-200/70 dark:hover:bg-slate-800'
+            }`}
+          >
+            <span>🛍️ 30% Wants</span>
+            <span className="text-[9px] font-medium opacity-80">Shopping & Dining</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setBudgetBucket('Savings')}
+            className={`py-2 px-2 rounded-2xl border text-xs font-black transition-all cursor-pointer flex flex-col items-center gap-0.5 ${
+              budgetBucket === 'Savings'
+                ? 'bg-emerald-600 text-white border-emerald-600 shadow-md scale-[1.02]'
+                : 'bg-slate-100 dark:bg-slate-900/60 text-slate-600 dark:text-slate-300 border-slate-200/60 dark:border-white/10 hover:bg-slate-200/70 dark:hover:bg-slate-800'
+            }`}
+          >
+            <span>📈 20% Savings</span>
+            <span className="text-[9px] font-medium opacity-80">SIPs & Investments</span>
+          </button>
         </div>
       </div>
 

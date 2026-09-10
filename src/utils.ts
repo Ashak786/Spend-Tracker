@@ -1,4 +1,29 @@
-import { Transaction, UserProfile } from './types';
+import { Transaction, UserProfile, CategoryType, BudgetBucket } from './types';
+
+/**
+ * Returns default 50/30/20 budget bucket for a category.
+ */
+export function getDefaultBudgetBucket(category: CategoryType): BudgetBucket {
+  switch (category) {
+    case 'Rent & Housing':
+    case 'Food & Groceries':
+    case 'Bills & Utilities':
+    case 'Transport & Commute':
+    case 'Healthcare & Insurance':
+    case 'EMI & Loan':
+      return 'Needs';
+    case 'Dining & Entertainment':
+    case 'Shopping':
+    case 'Subscriptions':
+    case 'Credit Card':
+    case 'Other Expenses':
+      return 'Wants';
+    case 'Investments & Savings':
+      return 'Savings';
+    default:
+      return 'Needs';
+  }
+}
 
 /**
  * Returns current month string in YYYY-MM format based on local system time.

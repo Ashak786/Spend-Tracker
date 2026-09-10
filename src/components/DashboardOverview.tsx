@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { UserProfile, Transaction, CategoryType } from '../types';
-import { formatCurrency, formatMonthYear, getMonthlyIncomeDetails } from '../utils';
-import { Wallet, PiggyBank, IndianRupee, AlertCircle, ArrowDownRight, ArrowUpRight, Edit2, X } from 'lucide-react';
+import { UserProfile, Transaction, CategoryType, BudgetBucket } from '../types';
+import { formatCurrency, formatMonthYear, getMonthlyIncomeDetails, getDefaultBudgetBucket } from '../utils';
+import { Wallet, PiggyBank, IndianRupee, AlertCircle, ArrowDownRight, ArrowUpRight, Edit2, X, PieChart, ShieldCheck, Target } from 'lucide-react';
 import { CATEGORY_META } from './ExpenseCategoryList';
 
 interface DashboardOverviewProps {
@@ -61,6 +61,27 @@ export default function DashboardOverview({
       colorClass: meta.barBg,
     };
   }).filter(seg => seg.amount > 0);
+
+  // 50-30-20 Rule Calculations
+  const getTransactionBucket = (t: Transaction): BudgetBucket => {
+    return t.budgetBucket || getDefaultBudgetBucket(t.category);
+  };
+
+  const needsSpent = monthlyTransactions
+    .filter(t => getTransactionBucket(t) === 'Needs')
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const wantsSpent = monthlyTransactions
+    .filter(t => getTransactionBucket(t) === 'Wants')
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const savingsSpent = monthlyTransactions
+    .filter(t => getTransactionBucket(t) === 'Savings')
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const needsTarget = effectiveSalary * 0.50;
+  const wantsTarget = effectiveSalary * 0.30;
+  const savingsTarget = effectiveSalary * 0.20;
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -298,6 +319,166 @@ export default function DashboardOverview({
             <span className="text-slate-400 dark:text-slate-500">Spent: {formatCurrency(totalSpent)}</span>
             <span className="text-slate-900 dark:text-white font-black">Limit: {formatCurrency(effectiveSalary)}</span>
           </div>
+        </div>
+      </div>
+
+      {/* 50 / 30 / 20 Auto Budget Allocation Breakdown */}
+      <div className="bg-white dark:bg-slate-900 md:bg-white/50 md:dark:bg-slate-900/40 backdrop-blur-none md:backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-5 sm:p-6 shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] hover:shadow-[0_12px_36px_rgba(15,23,42,0.08)] dark:hover:shadow-[0_12px_36px_rgba(0,0,0,0.4)] transition-all duration-300">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <PieChart className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <h3 className="text-xs font-black uppercase tracking-widest text-slate-700 dark:text-slate-200">
+                50 / 30 / 20 Salary Rule Breakdown
+              </h3>
+              <span className="text-[9px] bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold px-2 py-0.5 rounded-full border border-blue-200 dark:border-blue-900/40">
+                Auto Split
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
+              Automatic salary allocation for <span className="font-bold text-slate-800 dark:text-slate-200">{currentUser.name}</span>
+            </p>
+          </div>
+          <div className="text-left sm:text-right shrink-0">
+            <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase block">Salary Income</span>
+            <span className="text-sm font-black text-slate-900 dark:text-white font-mono">{formatCurrency(effectiveSalary)}</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* 50% Needs */}
+          {(() => {
+            const needsRemaining = needsTarget - needsSpent;
+            return (
+              <div className="bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200/70 dark:border-blue-900/40 rounded-2xl p-4 flex flex-col justify-between space-y-3">
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-[11px] font-black text-blue-800 dark:text-blue-300 uppercase tracking-wider">
+                      🏠 50% Needs
+                    </span>
+                    <span className="text-xs font-black text-blue-700 dark:text-blue-400 font-mono">
+                      {formatCurrency(needsTarget)}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400">Rent, Groceries, Bills & Essentials</p>
+                </div>
+                <div>
+                  <div className="flex justify-between text-[11px] font-bold mb-1">
+                    <span className="text-slate-600 dark:text-slate-300">Spent: {formatCurrency(needsSpent)}</span>
+                    <span className={needsSpent > needsTarget ? 'text-rose-600 dark:text-rose-400 font-black' : 'text-emerald-600 dark:text-emerald-400 font-bold'}>
+                      {needsTarget > 0 ? ((needsSpent / needsTarget) * 100).toFixed(0) : 0}% used
+                    </span>
+                  </div>
+                  <div className="w-full bg-blue-200/50 dark:bg-blue-900/50 h-2 rounded-full overflow-hidden mb-2.5">
+                    <div 
+                      className={`h-full rounded-full transition-all duration-500 ${needsSpent > needsTarget ? 'bg-rose-500' : 'bg-blue-600'}`}
+                      style={{ width: `${Math.min(100, needsTarget > 0 ? (needsSpent / needsTarget) * 100 : 0)}%` }}
+                    />
+                  </div>
+                  <div className="pt-2 border-t border-blue-200/50 dark:border-blue-900/40 flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Available / Left:</span>
+                    <span className={`text-xs font-black font-mono px-2 py-0.5 rounded-lg ${
+                      needsRemaining >= 0 
+                        ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40' 
+                        : 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/40'
+                    }`}>
+                      {needsRemaining >= 0 ? formatCurrency(needsRemaining) : `-${formatCurrency(Math.abs(needsRemaining))} (Over)`}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* 30% Wants */}
+          {(() => {
+            const wantsRemaining = wantsTarget - wantsSpent;
+            return (
+              <div className="bg-purple-50/70 dark:bg-purple-950/30 border border-purple-200/70 dark:border-purple-900/40 rounded-2xl p-4 flex flex-col justify-between space-y-3">
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-[11px] font-black text-purple-800 dark:text-purple-300 uppercase tracking-wider">
+                      🛍️ 30% Wants
+                    </span>
+                    <span className="text-xs font-black text-purple-700 dark:text-purple-400 font-mono">
+                      {formatCurrency(wantsTarget)}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400">Dining, Shopping & Lifestyle</p>
+                </div>
+                <div>
+                  <div className="flex justify-between text-[11px] font-bold mb-1">
+                    <span className="text-slate-600 dark:text-slate-300">Spent: {formatCurrency(wantsSpent)}</span>
+                    <span className={wantsSpent > wantsTarget ? 'text-rose-600 dark:text-rose-400 font-black' : 'text-emerald-600 dark:text-emerald-400 font-bold'}>
+                      {wantsTarget > 0 ? ((wantsSpent / wantsTarget) * 100).toFixed(0) : 0}% used
+                    </span>
+                  </div>
+                  <div className="w-full bg-purple-200/50 dark:bg-purple-900/50 h-2 rounded-full overflow-hidden mb-2.5">
+                    <div 
+                      className={`h-full rounded-full transition-all duration-500 ${wantsSpent > wantsTarget ? 'bg-rose-500' : 'bg-purple-600'}`}
+                      style={{ width: `${Math.min(100, wantsTarget > 0 ? (wantsSpent / wantsTarget) * 100 : 0)}%` }}
+                    />
+                  </div>
+                  <div className="pt-2 border-t border-purple-200/50 dark:border-purple-900/40 flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">Available / Left:</span>
+                    <span className={`text-xs font-black font-mono px-2 py-0.5 rounded-lg ${
+                      wantsRemaining >= 0 
+                        ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40' 
+                        : 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/40'
+                    }`}>
+                      {wantsRemaining >= 0 ? formatCurrency(wantsRemaining) : `-${formatCurrency(Math.abs(wantsRemaining))} (Over)`}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* 20% Savings */}
+          {(() => {
+            const savingsRemaining = savingsTarget - savingsSpent;
+            return (
+              <div className="bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/70 dark:border-emerald-900/40 rounded-2xl p-4 flex flex-col justify-between space-y-3">
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-[11px] font-black text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">
+                      📈 20% Savings
+                    </span>
+                    <span className="text-xs font-black text-emerald-700 dark:text-emerald-400 font-mono">
+                      {formatCurrency(savingsTarget)}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400">Mutual Funds, SIPs & Investments</p>
+                </div>
+                <div>
+                  <div className="flex justify-between text-[11px] font-bold mb-1">
+                    <span className="text-slate-600 dark:text-slate-300">Saved: {formatCurrency(savingsSpent)}</span>
+                    <span className={savingsSpent >= savingsTarget ? 'text-emerald-600 dark:text-emerald-400 font-black' : 'text-amber-600 dark:text-amber-400 font-bold'}>
+                      {savingsTarget > 0 ? ((savingsSpent / savingsTarget) * 100).toFixed(0) : 0}% target
+                    </span>
+                  </div>
+                  <div className="w-full bg-emerald-200/50 dark:bg-emerald-900/50 h-2 rounded-full overflow-hidden mb-2.5">
+                    <div 
+                      className="h-full rounded-full bg-emerald-600 transition-all duration-500"
+                      style={{ width: `${Math.min(100, savingsTarget > 0 ? (savingsSpent / savingsTarget) * 100 : 0)}%` }}
+                    />
+                  </div>
+                  <div className="pt-2 border-t border-emerald-200/50 dark:border-emerald-900/40 flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase">
+                      {savingsRemaining <= 0 ? 'Goal Achieved:' : 'Left to Save:'}
+                    </span>
+                    <span className={`text-xs font-black font-mono px-2 py-0.5 rounded-lg ${
+                      savingsRemaining <= 0 
+                        ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40' 
+                        : 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/40'
+                    }`}>
+                      {savingsRemaining <= 0 ? `${formatCurrency(savingsSpent)} (Met)` : formatCurrency(savingsRemaining)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </div>
     </div>

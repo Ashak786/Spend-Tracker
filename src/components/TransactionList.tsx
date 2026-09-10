@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Transaction, UserProfile, CategoryType } from '../types';
-import { formatCurrency, formatIndianDate, exportToPDF, formatMonthYear } from '../utils';
+import { Transaction, UserProfile, CategoryType, BudgetBucket } from '../types';
+import { formatCurrency, formatIndianDate, exportToPDF, formatMonthYear, getDefaultBudgetBucket } from '../utils';
 import { CATEGORY_META } from './ExpenseCategoryList';
 import { Search, Download, Trash2, CalendarRange, Inbox, Filter, Check, X, Pencil } from 'lucide-react';
 
@@ -29,6 +29,7 @@ export default function TransactionList({
   const [editTitle, setEditTitle] = useState('');
   const [editAmount, setEditAmount] = useState('');
   const [editCategory, setEditCategory] = useState<CategoryType>('Other Expenses');
+  const [editBucket, setEditBucket] = useState<BudgetBucket>('Needs');
   const [editDate, setEditDate] = useState('');
   const [editDescription, setEditDescription] = useState('');
 
@@ -38,6 +39,7 @@ export default function TransactionList({
       setEditTitle(editingTx.title);
       setEditAmount(editingTx.amount.toString());
       setEditCategory(editingTx.category);
+      setEditBucket(editingTx.budgetBucket || getDefaultBudgetBucket(editingTx.category));
       setEditDate(editingTx.date);
       setEditDescription(editingTx.description || '');
     }
@@ -204,9 +206,33 @@ export default function TransactionList({
                     
                     {/* Name & Details */}
                     <div className="min-w-0">
-                      <h4 className="text-sm font-bold text-slate-900 dark:text-white truncate" title={t.title}>
-                        {t.title}
-                      </h4>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <h4 className="text-sm font-bold text-slate-900 dark:text-white truncate" title={t.title}>
+                          {t.title}
+                        </h4>
+                        {(() => {
+                          const bucket = t.budgetBucket || getDefaultBudgetBucket(t.category);
+                          if (bucket === 'Needs') {
+                            return (
+                              <span className="text-[9px] font-black px-1.5 py-0.5 rounded-md bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-900/40">
+                                50% Needs
+                              </span>
+                            );
+                          } else if (bucket === 'Wants') {
+                            return (
+                              <span className="text-[9px] font-black px-1.5 py-0.5 rounded-md bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 border border-purple-200/60 dark:border-purple-900/40">
+                                30% Wants
+                              </span>
+                            );
+                          } else {
+                            return (
+                              <span className="text-[9px] font-black px-1.5 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-900/40">
+                                20% Savings
+                              </span>
+                            );
+                          }
+                        })()}
+                      </div>
                       <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold truncate mt-0.5" title={t.description}>
                         {t.description || t.category}
                       </p>
@@ -321,6 +347,7 @@ export default function TransactionList({
                   title: editTitle.trim(),
                   amount: Number(parsedAmount.toFixed(2)),
                   category: editCategory,
+                  budgetBucket: editBucket,
                   date: editDate,
                   description: editDescription.trim() || undefined,
                 });
@@ -385,7 +412,11 @@ export default function TransactionList({
                   </label>
                   <select
                     value={editCategory}
-                    onChange={(e) => setEditCategory(e.target.value as CategoryType)}
+                    onChange={(e) => {
+                      const newCat = e.target.value as CategoryType;
+                      setEditCategory(newCat);
+                      setEditBucket(getDefaultBudgetBucket(newCat));
+                    }}
                     className="w-full text-base md:text-sm px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-800 cursor-pointer font-bold text-slate-800 dark:text-slate-200 focus:bg-white dark:focus:bg-slate-900 transition-colors duration-150"
                   >
                     {Object.keys(CATEGORY_META).map((catKey) => (
@@ -394,6 +425,54 @@ export default function TransactionList({
                       </option>
                     ))}
                   </select>
+                </div>
+              </div>
+
+              {/* 50/30/20 Budget Bucket Selector in Edit Modal */}
+              <div>
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 flex items-center justify-between">
+                  <span>Categorize into 50 / 30 / 20 Rule</span>
+                  <span className="text-[10px] text-blue-600 dark:text-blue-400 font-bold">Manual Rule Selection</span>
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditBucket('Needs')}
+                    className={`py-2 px-2 rounded-2xl border text-xs font-black transition-all cursor-pointer flex flex-col items-center gap-0.5 ${
+                      editBucket === 'Needs'
+                        ? 'bg-blue-600 text-white border-blue-600 shadow-md scale-[1.02]'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    <span>🏠 50% Needs</span>
+                    <span className="text-[9px] font-medium opacity-80">Essentials</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setEditBucket('Wants')}
+                    className={`py-2 px-2 rounded-2xl border text-xs font-black transition-all cursor-pointer flex flex-col items-center gap-0.5 ${
+                      editBucket === 'Wants'
+                        ? 'bg-purple-600 text-white border-purple-600 shadow-md scale-[1.02]'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    <span>🛍️ 30% Wants</span>
+                    <span className="text-[9px] font-medium opacity-80">Lifestyle</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setEditBucket('Savings')}
+                    className={`py-2 px-2 rounded-2xl border text-xs font-black transition-all cursor-pointer flex flex-col items-center gap-0.5 ${
+                      editBucket === 'Savings'
+                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-md scale-[1.02]'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    <span>📈 20% Savings</span>
+                    <span className="text-[9px] font-medium opacity-80">Investments</span>
+                  </button>
                 </div>
               </div>
 
