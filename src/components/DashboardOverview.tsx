@@ -331,7 +331,7 @@ export default function DashboardOverview({
               <h3 className="text-xs font-black uppercase tracking-widest text-slate-700 dark:text-slate-200">
                 50 / 30 / 20 Salary Rule Breakdown
               </h3>
-              <span className="text-[9px] bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold px-2 py-0.5 rounded-full border border-blue-200 dark:border-blue-900/40">
+              <span className="hidden sm:inline-block text-[9px] bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold px-2 py-0.5 rounded-full border border-blue-200 dark:border-blue-900/40">
                 Auto Split
               </span>
             </div>
