@@ -211,7 +211,7 @@ export default function TransactionList({
                           {t.title}
                         </h4>
                         {(() => {
-                          const bucket = t.budgetBucket || getDefaultBudgetBucket(t.category);
+                          const bucket = t.budgetBucket ?? getDefaultBudgetBucket(t.category);
                           if (bucket === 'Needs') {
                             return (
                               <span className="text-[9px] font-black px-1.5 py-0.5 rounded-md bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-900/40">
@@ -224,10 +224,16 @@ export default function TransactionList({
                                 30% Wants
                               </span>
                             );
-                          } else {
+                          } else if (bucket === 'Savings') {
                             return (
                               <span className="text-[9px] font-black px-1.5 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-900/40">
                                 20% Savings
+                              </span>
+                            );
+                          } else {
+                            return (
+                              <span className="text-[9px] font-black px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700">
+                                Normal Entry
                               </span>
                             );
                           }
@@ -431,14 +437,14 @@ export default function TransactionList({
               {/* 50/30/20 Budget Bucket Selector in Edit Modal */}
               <div>
                 <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 flex items-center justify-between">
-                  <span>Categorize into 50 / 30 / 20 Rule</span>
+                  <span>50 / 30 / 20 Budget Allocation</span>
                   <span className="text-[10px] text-blue-600 dark:text-blue-400 font-bold">Manual Rule Selection</span>
                 </label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   <button
                     type="button"
                     onClick={() => setEditBucket('Needs')}
-                    className={`py-2 px-2 rounded-2xl border text-xs font-black transition-all cursor-pointer flex flex-col items-center gap-0.5 ${
+                    className={`py-2 px-1.5 rounded-2xl border text-xs font-black transition-all cursor-pointer flex flex-col items-center gap-0.5 ${
                       editBucket === 'Needs'
                         ? 'bg-blue-600 text-white border-blue-600 shadow-md scale-[1.02]'
                         : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -451,7 +457,7 @@ export default function TransactionList({
                   <button
                     type="button"
                     onClick={() => setEditBucket('Wants')}
-                    className={`py-2 px-2 rounded-2xl border text-xs font-black transition-all cursor-pointer flex flex-col items-center gap-0.5 ${
+                    className={`py-2 px-1.5 rounded-2xl border text-xs font-black transition-all cursor-pointer flex flex-col items-center gap-0.5 ${
                       editBucket === 'Wants'
                         ? 'bg-purple-600 text-white border-purple-600 shadow-md scale-[1.02]'
                         : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -464,7 +470,7 @@ export default function TransactionList({
                   <button
                     type="button"
                     onClick={() => setEditBucket('Savings')}
-                    className={`py-2 px-2 rounded-2xl border text-xs font-black transition-all cursor-pointer flex flex-col items-center gap-0.5 ${
+                    className={`py-2 px-1.5 rounded-2xl border text-xs font-black transition-all cursor-pointer flex flex-col items-center gap-0.5 ${
                       editBucket === 'Savings'
                         ? 'bg-emerald-600 text-white border-emerald-600 shadow-md scale-[1.02]'
                         : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
@@ -472,6 +478,19 @@ export default function TransactionList({
                   >
                     <span>📈 20% Savings</span>
                     <span className="text-[9px] font-medium opacity-80">Investments</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setEditBucket('None')}
+                    className={`py-2 px-1.5 rounded-2xl border text-xs font-black transition-all cursor-pointer flex flex-col items-center gap-0.5 ${
+                      editBucket === 'None'
+                        ? 'bg-slate-700 text-white border-slate-700 shadow-md scale-[1.02] dark:bg-slate-200 dark:text-slate-900 dark:border-slate-200'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    <span>💳 Normal Entry</span>
+                    <span className="text-[9px] font-medium opacity-80">No Split</span>
                   </button>
                 </div>
               </div>

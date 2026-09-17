@@ -27,7 +27,7 @@ export type CategoryType =
   | 'Credit Card'
   | 'Other Expenses';
 
-export type BudgetBucket = 'Needs' | 'Wants' | 'Savings';
+export type BudgetBucket = 'Needs' | 'Wants' | 'Savings' | 'None';
 
 export interface CategoryBudget {
   category: CategoryType;

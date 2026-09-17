@@ -64,7 +64,7 @@ export default function DashboardOverview({
 
   // 50-30-20 Rule Calculations
   const getTransactionBucket = (t: Transaction): BudgetBucket => {
-    return t.budgetBucket || getDefaultBudgetBucket(t.category);
+    return t.budgetBucket ?? getDefaultBudgetBucket(t.category);
   };
 
   const needsSpent = monthlyTransactions
