@@ -13,7 +13,7 @@ import TransactionForm from './components/TransactionForm';
 import TransactionList from './components/TransactionList';
 import IncomeTracker from './components/IncomeTracker';
 import { LogoFull } from './components/Logo';
-import { IndianRupee, HelpCircle, Sparkles, BookOpen, CreditCard, X, Plus, ArrowDownLeft, Wallet } from 'lucide-react';
+import { IndianRupee, HelpCircle, Sparkles, BookOpen, CreditCard, X, Plus, ArrowDownLeft, Wallet, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   subscribeUsers,
@@ -272,8 +272,8 @@ export default function App() {
     saveTransaction(updatedTx).catch(err => console.error('Failed to update transaction:', err));
   };
 
-  // Income Inflow Handlers (Optionally create a dedicated profile if user requested, no auto creation)
-  const handleAddIncome = (newIncomeData: Omit<IncomeSource, 'id'>, createProfile?: boolean) => {
+  // Income Inflow Handlers (Entered and saved directly under Income Tracker)
+  const handleAddIncome = (newIncomeData: Omit<IncomeSource, 'id'>) => {
     const newId = `inc-${Date.now()}`;
     const newIncome: IncomeSource = {
       ...newIncomeData,
@@ -281,61 +281,11 @@ export default function App() {
     };
     setIncomes(prev => [newIncome, ...prev]);
     saveIncomeSource(newIncome).catch(err => console.error('Failed to save income source:', err));
-
-    // Only create profile if user explicitly opted in
-    if (createProfile) {
-      const profileId = `profile-inc-${newId}`;
-      const userProfile: UserProfile = {
-        id: profileId,
-        name: newIncomeData.sourceName,
-        salary: newIncomeData.amount,
-        joinedAt: newIncomeData.date,
-        isIncomeProfile: true,
-        incomeSourceId: newId,
-        photoUrl: `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(newIncomeData.sourceName)}`
-      };
-      setUsers(prev => [...prev, userProfile]);
-      saveUserProfile(userProfile).catch(err => console.error('Failed to create profile for income:', err));
-    }
-  };
-
-  // Handler to create a profile for an existing income source on demand
-  const handleCreateProfileForIncome = (income: IncomeSource) => {
-    const profileId = `profile-inc-${income.id}`;
-    const existing = users.find(u => u.id === profileId || u.incomeSourceId === income.id);
-    if (existing) {
-      setCurrentUser(existing);
-      return;
-    }
-    const userProfile: UserProfile = {
-      id: profileId,
-      name: income.sourceName,
-      salary: income.amount,
-      joinedAt: income.date,
-      isIncomeProfile: true,
-      incomeSourceId: income.id,
-      photoUrl: `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(income.sourceName)}`
-    };
-    setUsers(prev => [...prev, userProfile]);
-    setCurrentUser(userProfile);
-    saveUserProfile(userProfile).catch(err => console.error('Failed to create profile for income:', err));
   };
 
   const handleUpdateIncome = (updatedIncome: IncomeSource) => {
     setIncomes(prev => prev.map(i => i.id === updatedIncome.id ? updatedIncome : i));
     saveIncomeSource(updatedIncome).catch(err => console.error('Failed to update income source:', err));
-
-    const profileId = `profile-inc-${updatedIncome.id}`;
-    const existingProfile = users.find(u => u.id === profileId || u.incomeSourceId === updatedIncome.id);
-    if (existingProfile) {
-      saveUserProfile({
-        ...existingProfile,
-        name: updatedIncome.sourceName,
-        salary: updatedIncome.amount,
-        isIncomeProfile: true,
-        incomeSourceId: updatedIncome.id,
-      }).catch(err => console.error('Failed to update profile for income:', err));
-    }
   };
 
   const handleDeleteIncome = async (id: string) => {
@@ -413,7 +363,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans selection:bg-blue-50 dark:selection:bg-blue-950/40 selection:text-blue-900 transition-colors duration-300">
+    <div className="min-h-screen relative overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans selection:bg-blue-50 dark:selection:bg-blue-950/40 selection:text-blue-900 transition-colors duration-300 pb-20 md:pb-0">
       {/* Beautiful ambient glowing spots for Glassmorphism matching the brand palette */}
       <div className="hidden md:block absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] max-w-[600px] rounded-full bg-blue-300/20 dark:bg-blue-500/5 blur-[120px] pointer-events-none" />
       <div className="hidden md:block absolute bottom-[10%] right-[-10%] w-[60vw] h-[60vw] max-w-[700px] rounded-full bg-orange-300/15 dark:bg-orange-500/5 blur-[150px] pointer-events-none" />
@@ -424,7 +374,7 @@ export default function App() {
       <div className="h-1.5 w-full bg-gradient-to-r from-blue-700 via-orange-500 to-blue-800 relative z-10 animate-pulse" />
 
       {/* Main Workspace container */}
-      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-4 sm:space-y-6 relative z-10">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-4 sm:space-y-6 relative z-10 pb-28 md:pb-8">
         
         {/* Header section as a Bento Card with elevated branding & profile status */}
         <header className="bg-white dark:bg-slate-900 md:bg-white/50 md:dark:bg-slate-900/40 backdrop-blur-none md:backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-4 sm:p-5 shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300 hover:border-white/95 dark:hover:border-white/15">
@@ -674,7 +624,6 @@ export default function App() {
                   onDeleteIncome={handleDeleteIncome}
                   onSelectIncomeToSpend={handleSelectIncomeToSpend}
                   onAddTransaction={handleAddTransaction}
-                  onCreateProfile={handleCreateProfileForIncome}
                   onSelectUser={handleSelectUser}
                 />
               </section>
@@ -683,20 +632,6 @@ export default function App() {
         )}
 
 
-
-        {/* Floating Action Button for Mobile Expense Addition */}
-        {currentUser && !isMobileFormOpen && (
-          <>
-            <button
-              onClick={() => setIsMobileFormOpen(true)}
-              className="fixed bottom-6 right-6 z-40 md:hidden bg-blue-600 active:bg-blue-700 text-white rounded-full w-14 h-14 flex items-center justify-center shadow-[0_8px_30px_rgba(37,99,235,0.4)] active:scale-90 transition-all duration-150 border-2 border-white dark:border-slate-900 cursor-pointer select-none touch-manipulation transform-gpu will-change-transform group"
-              style={{ bottom: '24px', right: '24px' }}
-              aria-label="Add Expense"
-            >
-              <Plus className="w-7 h-7 transition-transform duration-200 transform-gpu group-active:rotate-90" />
-            </button>
-          </>
-        )}
 
         {/* Mobile Form Pop-out Modal Overlay */}
         <AnimatePresence>
@@ -812,6 +747,63 @@ export default function App() {
             </>
           )}
         </AnimatePresence>
+
+        {/* Mobile Bottom Navigation Dock */}
+        {currentUser && (
+          <nav className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/80 dark:border-white/10 px-4 py-2 flex items-center justify-around shadow-2xl">
+            <button
+              onClick={() => {
+                setActiveSection('salary_tracker');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`flex flex-col items-center gap-1 p-1.5 rounded-xl transition-all cursor-pointer ${
+                activeSection === 'salary_tracker'
+                  ? 'text-blue-600 dark:text-blue-400 font-bold'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+              }`}
+            >
+              <CreditCard className="w-5 h-5" />
+              <span className="text-[10px] font-black tracking-tight">Salary</span>
+            </button>
+
+            <button
+              onClick={() => setIsMobileFormOpen(true)}
+              className="flex items-center justify-center -mt-6 bg-blue-600 active:bg-blue-700 text-white rounded-2xl w-13 h-12 shadow-lg border-2 border-white dark:border-slate-900 cursor-pointer active:scale-90 transition-transform"
+              aria-label="Add Expense"
+            >
+              <Plus className="w-6 h-6" />
+            </button>
+
+            <button
+              onClick={() => {
+                setActiveSection('income_tracker');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`flex flex-col items-center gap-1 p-1.5 rounded-xl transition-all cursor-pointer relative ${
+                activeSection === 'income_tracker'
+                  ? 'text-emerald-600 dark:text-emerald-400 font-bold'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+              }`}
+            >
+              <ArrowDownLeft className="w-5 h-5" />
+              <span className="text-[10px] font-black tracking-tight">Inflows</span>
+              {currentUserIncomes.length > 0 && (
+                <span className="absolute top-1 right-2 w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              )}
+            </button>
+
+            <button
+              onClick={() => {
+                const el = document.getElementById('profile-management-section');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="flex flex-col items-center gap-1 p-1.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer"
+            >
+              <Users className="w-5 h-5" />
+              <span className="text-[10px] font-black tracking-tight">Profiles</span>
+            </button>
+          </nav>
+        )}
       </main>
     </div>
   );

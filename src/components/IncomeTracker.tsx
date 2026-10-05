@@ -339,33 +339,32 @@ export default function IncomeTracker({
             {incomeStats.map(({ income: inc, linkedTxs, totalSpent, remaining, spentPercent }) => {
               const isExpanded = expandedSourceId === inc.id;
               const catMeta = INCOME_CATEGORIES[inc.category] || INCOME_CATEGORIES['Other Inflow'];
-              const linkedProfile = users?.find(u => u.incomeSourceId === inc.id || u.id === `profile-inc-${inc.id}`);
 
               return (
                 <div
                   key={inc.id}
-                  className="bg-white dark:bg-slate-900 md:bg-white/50 md:dark:bg-slate-900/40 backdrop-blur-none md:backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl p-4 sm:p-5 shadow-[0_4px_24px_rgba(15,23,42,0.04)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.2)] transition-all hover:border-slate-300 dark:hover:border-white/20"
+                  className="bg-white dark:bg-slate-900 md:bg-white/50 md:dark:bg-slate-900/40 backdrop-blur-none md:backdrop-blur-xl border border-slate-200/80 dark:border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-[0_4px_24px_rgba(15,23,42,0.04)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.2)] transition-all hover:border-emerald-300 dark:hover:border-emerald-800/60 space-y-4"
                 >
-                  {/* Top Row: Title, Category, Received Date, Actions */}
+                  {/* Card Header: Source Name, Category, Date, and Spend Action */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-white/5">
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl p-2 rounded-2xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/5 shrink-0">
+                      <span className="text-2xl p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/5 shrink-0 shadow-2xs">
                         {catMeta.icon}
                       </span>
-                      <div>
+                      <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="text-base font-bold text-slate-900 dark:text-white">
+                          <h4 className="text-base font-black text-slate-900 dark:text-white tracking-tight">
                             {inc.sourceName}
                           </h4>
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${catMeta.color}`}>
+                          <span className={`text-[10px] font-black px-2.5 py-0.5 rounded-full ${catMeta.color}`}>
                             {catMeta.label}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 text-[11px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">
-                          <span>Received on {formatIndianDate(inc.date)}</span>
+                        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                          <span>Received {formatIndianDate(inc.date)}</span>
                           {inc.notes && (
                             <>
-                              <span>•</span>
+                              <span aria-hidden="true">·</span>
                               <span className="truncate max-w-[200px]" title={inc.notes}>{inc.notes}</span>
                             </>
                           )}
@@ -373,163 +372,119 @@ export default function IncomeTracker({
                       </div>
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex items-center gap-1.5 flex-wrap self-end sm:self-center">
-                      {linkedProfile ? (
-                        <div className="flex items-center gap-1 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800/60 px-2.5 py-1 rounded-xl">
-                          <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300">
-                            💰 Inflow Profile Active
-                          </span>
-                          {onSelectUser && (
-                            <button
-                              onClick={() => onSelectUser(linkedProfile.id)}
-                              className="text-[10px] font-black underline text-emerald-800 dark:text-emerald-200 hover:text-emerald-600 cursor-pointer ml-1"
-                              title="Switch active user to this profile"
-                            >
-                              Switch
-                            </button>
-                          )}
-                        </div>
-                      ) : onCreateProfile ? (
-                        <button
-                          type="button"
-                          onClick={() => onCreateProfile(inc)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-950 hover:text-emerald-700 dark:hover:text-emerald-300 text-xs font-bold border border-slate-200/70 dark:border-slate-700/60 transition-all cursor-pointer shadow-2xs hover:scale-105 active:scale-95"
-                          title="Create an Inflow Profile for this income stream in Profile Management"
-                        >
-                          <UserPlus className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                          <span>+ Create Profile</span>
-                        </button>
-                      ) : null}
-
+                    {/* Action Controls */}
+                    <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-between sm:justify-end">
                       <button
                         onClick={() => handleOpenSpendModal(inc)}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-300/80 dark:border-emerald-800/60 text-xs font-black hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-all cursor-pointer shadow-xs active:scale-95"
+                        className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black shadow-md active:scale-95 transition-all cursor-pointer flex-1 sm:flex-none"
                         title={`Log an expense paid using money from ${inc.sourceName}`}
                       >
                         <Receipt className="w-3.5 h-3.5" />
                         <span>Spend from this</span>
                       </button>
 
-                      <button
-                        onClick={() => handleOpenEditModal(inc)}
-                        className="p-1.5 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                        title="Edit income details"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </button>
-
-                      {deletingId === inc.id ? (
-                        <div className="flex items-center gap-1 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 p-1 rounded-xl">
-                          <button
-                            onClick={() => {
-                              onDeleteIncome(inc.id);
-                              setDeletingId(null);
-                            }}
-                            className="p-1 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900 rounded-md cursor-pointer"
-                            title="Confirm delete"
-                          >
-                            <Check className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => setDeletingId(null)}
-                            className="p-1 text-slate-400 hover:bg-slate-200 rounded-md cursor-pointer"
-                            title="Cancel"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      ) : (
+                      <div className="flex items-center gap-1">
                         <button
-                          onClick={() => setDeletingId(inc.id)}
-                          className="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                          title="Delete income"
+                          onClick={() => handleOpenEditModal(inc)}
+                          className="p-2 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer min-w-[38px] min-h-[38px] flex items-center justify-center"
+                          title="Edit income details"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Pencil className="w-4 h-4" />
                         </button>
-                      )}
+
+                        {deletingId === inc.id ? (
+                          <div className="flex items-center gap-1 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 p-1 rounded-xl">
+                            <button
+                              onClick={() => {
+                                onDeleteIncome(inc.id);
+                                setDeletingId(null);
+                              }}
+                              className="p-1.5 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900 rounded-md cursor-pointer"
+                              title="Confirm delete"
+                            >
+                              <Check className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => setDeletingId(null)}
+                              className="p-1.5 text-slate-400 hover:bg-slate-200 rounded-md cursor-pointer"
+                              title="Cancel"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setDeletingId(inc.id)}
+                            className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer min-w-[38px] min-h-[38px] flex items-center justify-center"
+                            title="Delete income"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
 
-                  {/* Financial Metrics Strip */}
-                  <div className="grid grid-cols-3 gap-2 sm:gap-4 py-3 border-b border-slate-100 dark:border-white/5 text-center">
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                        Received
-                      </p>
-                      <p className="text-sm sm:text-base font-mono font-black text-slate-800 dark:text-slate-100 mt-0.5">
-                        {formatCurrency(inc.amount)}
-                      </p>
+                  {/* High-Legibility Financial Summary & Utilization Progress */}
+                  <div className="bg-slate-50/80 dark:bg-slate-950/40 border border-slate-200/60 dark:border-white/5 rounded-2xl p-3.5 space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Available Balance:</span>
+                        <span className={`text-lg font-mono font-black ${remaining < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                          {formatCurrency(remaining)}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-3 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                        <span>Total Inflow: <strong className="text-slate-800 dark:text-slate-200 font-mono">{formatCurrency(inc.amount)}</strong></span>
+                        <span aria-hidden="true">·</span>
+                        <span>Spent: <strong className="text-orange-600 dark:text-orange-400 font-mono">{formatCurrency(totalSpent)}</strong></span>
+                      </div>
                     </div>
 
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                        Used / Spent
-                      </p>
-                      <p className="text-sm sm:text-base font-mono font-black text-orange-600 dark:text-orange-400 mt-0.5">
-                        {formatCurrency(totalSpent)}
-                      </p>
-                    </div>
-
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                        Remaining Balance
-                      </p>
-                      <p className={`text-sm sm:text-base font-mono font-black mt-0.5 ${
-                        remaining < 0 
-                          ? 'text-rose-600 dark:text-rose-400' 
-                          : 'text-emerald-600 dark:text-emerald-400'
-                      }`}>
-                        {formatCurrency(remaining)}
-                      </p>
+                    {/* Progress Bar */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 dark:text-slate-500">
+                        <span>{spentPercent}% Utilized</span>
+                        <span className={remaining < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}>
+                          {remaining < 0 ? `Overspent by ${formatCurrency(Math.abs(remaining))}` : `${formatCurrency(remaining)} remaining`}
+                        </span>
+                      </div>
+                      <div className="w-full bg-slate-200/80 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full transition-all duration-500 ${
+                            remaining < 0 
+                              ? 'bg-rose-500' 
+                              : spentPercent > 80 
+                              ? 'bg-amber-500' 
+                              : 'bg-emerald-500'
+                          }`}
+                          style={{ width: `${Math.min(100, spentPercent)}%` }}
+                        />
+                      </div>
                     </div>
                   </div>
 
-                  {/* Progress Bar of Utilization */}
-                  <div className="py-2.5">
-                    <div className="flex items-center justify-between text-[11px] font-bold mb-1">
-                      <span className="text-slate-500 dark:text-slate-400">
-                        Utilization: {spentPercent}% used
-                      </span>
-                      <span className={remaining < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}>
-                        {remaining < 0 ? `Overspent by ${formatCurrency(Math.abs(remaining))}` : `${formatCurrency(remaining)} available`}
-                      </span>
-                    </div>
-                    <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full transition-all duration-500 ${
-                          remaining < 0 
-                            ? 'bg-rose-500' 
-                            : spentPercent > 80 
-                            ? 'bg-amber-500' 
-                            : 'bg-emerald-500'
-                        }`}
-                        style={{ width: `${Math.min(100, spentPercent)}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Toggle: "What was this income used for?" */}
-                  <div className="pt-2">
+                  {/* Expandable Expense Breakdown */}
+                  <div>
                     <button
                       onClick={() => setExpandedSourceId(isExpanded ? null : inc.id)}
-                      className="w-full flex items-center justify-between py-2 px-3 rounded-2xl bg-slate-50 dark:bg-slate-950/30 hover:bg-slate-100 dark:hover:bg-slate-900/60 text-xs font-bold text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
+                      className="w-full flex items-center justify-between py-2 px-3 rounded-xl bg-slate-100/70 dark:bg-slate-800/40 hover:bg-slate-200/70 dark:hover:bg-slate-800/80 text-xs font-bold text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
                     >
                       <span className="flex items-center gap-1.5">
                         <Receipt className="w-3.5 h-3.5 text-blue-500" />
-                        <span>Used for what? ({linkedTxs.length} expense{linkedTxs.length === 1 ? '' : 's'} logged)</span>
+                        <span>Expenses funded by this income ({linkedTxs.length})</span>
                       </span>
                       {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                     </button>
 
-                    {/* Detailed List of Expenses Funded by this Income */}
+                    {/* Detailed Expense List */}
                     {isExpanded && (
-                      <div className="mt-3 p-3 rounded-2xl bg-slate-50/70 dark:bg-slate-950/40 border border-slate-200/60 dark:border-white/5 space-y-2 animate-in fade-in duration-200">
+                      <div className="mt-2.5 p-3 rounded-2xl bg-slate-50/70 dark:bg-slate-950/40 border border-slate-200/60 dark:border-white/5 space-y-2 animate-in fade-in duration-200">
                         {linkedTxs.length === 0 ? (
-                          <div className="text-center py-4 text-xs text-slate-400 dark:text-slate-500 space-y-1">
-                            <p className="font-semibold">No expenses recorded against this income yet.</p>
-                            <p className="text-[11px]">When recording an expense, select "{inc.sourceName}" in the Funded From dropdown.</p>
-                          </div>
+                          <p className="text-center py-3 text-xs font-medium text-slate-400 dark:text-slate-500">
+                            No expenses recorded against "{inc.sourceName}" yet. Click "Spend from this" to log one.
+                          </p>
                         ) : (
                           <div className="space-y-2">
                             {linkedTxs.map(tx => {
@@ -673,26 +628,6 @@ export default function IncomeTracker({
                   placeholder="e.g. Sent via GPay, Bank transfer, deposit"
                   className="w-full text-base md:text-sm px-4 py-2.5 border border-slate-200/80 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-100 dark:bg-slate-800 font-bold text-slate-800 dark:text-white"
                 />
-              </div>
-
-              {/* Optional Inflow Profile Creation Checkbox */}
-              <div className="p-3.5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-900/40">
-                <label className="flex items-start gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={createProfileOption}
-                    onChange={e => setCreateProfileOption(e.target.checked)}
-                    className="mt-0.5 w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300 dark:border-slate-700 cursor-pointer"
-                  />
-                  <div>
-                    <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
-                      Create dedicated Inflow Profile for this income source
-                    </span>
-                    <span className="text-[11px] text-slate-500 dark:text-slate-400 block mt-0.5">
-                      (Optional) Adds a separate profile under &quot;Inflow Profiles&quot; in the profile manager. If unchecked, it will be tracked inside this account.
-                    </span>
-                  </div>
-                </label>
               </div>
 
               <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">

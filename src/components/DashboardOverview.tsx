@@ -110,11 +110,11 @@ export default function DashboardOverview({
         </div>
       </div>
 
-      {/* Metric Cards - Horizontal Swipeable Carousel on Mobile, 3 Columns on Desktop */}
-      <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-3 -mx-4 px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:grid md:grid-cols-3 md:gap-6 md:pb-0 md:mx-0 md:px-0">
+      {/* Metric Cards - Clean Grid Layout matching section bounds on Mobile & Desktop */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-6">
         {/* Salary Income Card */}
         {isEditingIncome ? (
-          <div className="bg-blue-700 dark:bg-blue-950 md:bg-blue-700/85 md:dark:bg-blue-950/80 backdrop-blur-none md:backdrop-blur-xl border border-white/30 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-5 sm:p-6 text-white flex flex-col justify-between shadow-[0_8px_32px_rgba(37,99,235,0.15)] relative overflow-hidden min-h-[140px] sm:min-h-[160px] w-[84vw] shrink-0 snap-start md:snap-center md:w-auto transition-all duration-300 order-2 md:order-1">
+          <div className="bg-blue-700 dark:bg-blue-950 md:bg-blue-700/85 md:dark:bg-blue-950/80 backdrop-blur-none md:backdrop-blur-xl border border-white/30 dark:border-white/10 rounded-2xl sm:rounded-[32px] p-5 sm:p-6 text-white flex flex-col justify-between shadow-[0_8px_32px_rgba(37,99,235,0.15)] relative overflow-hidden min-h-[140px] sm:min-h-[160px] w-full transition-all duration-300 order-2 md:order-1">
             <div className="space-y-3 z-10 w-full">
               <div className="flex items-center justify-between">
                 <p className="text-blue-200 uppercase tracking-widest text-[9px] font-black">
@@ -200,7 +200,7 @@ export default function DashboardOverview({
             </div>
           </div>
         ) : (
-          <div className="bg-gradient-to-br from-blue-600 to-blue-800 dark:from-slate-900 dark:to-slate-950 md:from-blue-600/80 md:to-blue-800/80 md:dark:from-blue-950/55 md:dark:to-slate-900/40 backdrop-blur-none md:backdrop-blur-xl border border-white/30 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-5 sm:p-6 text-white flex flex-col justify-between shadow-[0_8px_32px_rgba(37,99,235,0.15)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] relative overflow-hidden min-h-[140px] sm:min-h-[160px] w-[84vw] shrink-0 snap-start md:snap-center md:w-auto hover:shadow-[0_12px_36px_rgba(37,99,235,0.22)] transition-all duration-300 order-2 md:order-1">
+          <div className="bg-gradient-to-br from-blue-600 to-blue-800 dark:from-slate-900 dark:to-slate-950 md:from-blue-600/80 md:to-blue-800/80 md:dark:from-blue-950/55 md:dark:to-slate-900/40 backdrop-blur-none md:backdrop-blur-xl border border-white/30 dark:border-white/10 rounded-2xl sm:rounded-[32px] p-5 sm:p-6 text-white flex flex-col justify-between shadow-[0_8px_32px_rgba(37,99,235,0.15)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] relative overflow-hidden min-h-[140px] sm:min-h-[160px] w-full hover:shadow-[0_12px_36px_rgba(37,99,235,0.22)] transition-all duration-300 order-2 md:order-1">
             <div className="absolute top-[-20px] right-[-20px] w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
             <div>
               <div className="flex items-center gap-1.5">
@@ -211,7 +211,7 @@ export default function DashboardOverview({
                   </span>
                 )}
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black tracking-tight font-display mt-2">
+              <h2 className="text-2xl sm:text-3xl font-black tracking-tight font-display mt-2 font-mono">
                 {formatCurrency(effectiveSalary)}
               </h2>
               {incentive ? (
@@ -239,10 +239,10 @@ export default function DashboardOverview({
         )}
 
         {/* Total Spending Card */}
-        <div className="bg-white dark:bg-slate-900 md:bg-white/50 md:dark:bg-slate-900/40 backdrop-blur-none md:backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-5 sm:p-6 shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] flex flex-col justify-between min-h-[140px] sm:min-h-[160px] w-[84vw] shrink-0 snap-start md:snap-center md:w-auto hover:shadow-[0_12px_36px_rgba(15,23,42,0.08)] dark:hover:shadow-[0_12px_36px_rgba(0,0,0,0.4)] transition-all duration-300 order-3 md:order-2">
+        <div className="bg-white dark:bg-slate-900 md:bg-white/50 md:dark:bg-slate-900/40 backdrop-blur-none md:backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-2xl sm:rounded-[32px] p-5 sm:p-6 shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] flex flex-col justify-between min-h-[140px] sm:min-h-[160px] w-full hover:shadow-[0_12px_36px_rgba(15,23,42,0.08)] dark:hover:shadow-[0_12px_36px_rgba(0,0,0,0.4)] transition-all duration-300 order-3 md:order-2">
           <div>
             <p className="text-slate-400 dark:text-slate-500 uppercase tracking-widest text-[10px] font-black">Total Spent</p>
-            <h2 className={`text-2xl sm:text-3xl font-black tracking-tight font-display mt-2 ${isOverspent ? 'text-rose-600 animate-pulse' : 'text-slate-900 dark:text-white'}`}>
+            <h2 className={`text-2xl sm:text-3xl font-black tracking-tight font-display font-mono mt-2 ${isOverspent ? 'text-rose-600 animate-pulse' : 'text-slate-900 dark:text-white'}`}>
               {formatCurrency(totalSpent)}
             </h2>
           </div>
@@ -262,7 +262,7 @@ export default function DashboardOverview({
         </div>
 
         {/* Net Savings / Balance Card - 1st on Mobile, 3rd on Desktop */}
-        <div className="bg-gradient-to-br from-white via-white to-emerald-50/40 dark:from-slate-900 dark:via-slate-900 dark:to-emerald-950/20 md:bg-white md:dark:bg-slate-900 md:bg-white/50 md:dark:bg-slate-900/40 backdrop-blur-none md:backdrop-blur-xl border border-emerald-300/80 dark:border-emerald-500/30 md:border-white/70 md:dark:border-white/10 rounded-3xl sm:rounded-[32px] p-5 sm:p-6 shadow-[0_8px_32px_rgba(16,185,129,0.12)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] flex flex-col justify-between min-h-[140px] sm:min-h-[160px] w-[84vw] shrink-0 snap-start md:snap-center md:w-auto hover:shadow-[0_12px_36px_rgba(15,23,42,0.08)] dark:hover:shadow-[0_12px_36px_rgba(0,0,0,0.4)] transition-all duration-300 order-1 md:order-3 relative overflow-hidden">
+        <div className="bg-gradient-to-br from-white via-white to-emerald-50/40 dark:from-slate-900 dark:via-slate-900 dark:to-emerald-950/20 md:bg-white md:dark:bg-slate-900 md:bg-white/50 md:dark:bg-slate-900/40 backdrop-blur-none md:backdrop-blur-xl border border-emerald-300/80 dark:border-emerald-500/30 md:border-white/70 md:dark:border-white/10 rounded-2xl sm:rounded-[32px] p-5 sm:p-6 shadow-[0_8px_32px_rgba(16,185,129,0.12)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] flex flex-col justify-between min-h-[140px] sm:min-h-[160px] w-full hover:shadow-[0_12px_36px_rgba(15,23,42,0.08)] dark:hover:shadow-[0_12px_36px_rgba(0,0,0,0.4)] transition-all duration-300 order-1 md:order-3 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-400/10 dark:bg-emerald-400/5 rounded-full blur-xl pointer-events-none" />
           <div>
             <div className="flex items-center justify-between">

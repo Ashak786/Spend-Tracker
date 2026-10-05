@@ -68,8 +68,6 @@ export default function UserProfileManager({
   onDeleteUser,
 }: UserProfileManagerProps) {
   const [isAdding, setIsAdding] = useState(false);
-  const [profileTypeToAdd, setProfileTypeToAdd] = useState<'salary' | 'inflow'>('salary');
-  const [sectionFilter, setSectionFilter] = useState<'all' | 'salary' | 'inflow'>('all');
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState('');
   const [newSalary, setNewSalary] = useState('');
@@ -151,14 +149,11 @@ export default function UserProfileManager({
       return;
     }
 
-    const isIncome = profileTypeToAdd === 'inflow';
-
     onAddUser(
       trimmedName,
       salaryNum,
-      isIncome ? null : (isNaN(incentiveNum ?? NaN) ? null : incentiveNum),
-      newPhoto,
-      isIncome
+      isNaN(incentiveNum ?? NaN) ? null : incentiveNum,
+      newPhoto
     );
     setNewName('');
     setNewSalary('');
@@ -478,25 +473,25 @@ export default function UserProfileManager({
   return (
     <div className="bg-white dark:bg-slate-900 md:bg-white/50 md:dark:bg-slate-900/40 backdrop-blur-none md:backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-4 sm:p-6 shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300 hover:border-white/90 dark:hover:border-white/20 space-y-5">
       {/* Top Header & Action Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         <div>
           <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 flex items-center gap-2">
             <Users className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-            Switch Active Profile
+            Switch Active User Profile
           </h2>
-          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">
-            Separate sections for Salary Accounts and Inflow of Income Profiles
+          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
+            Manage user profiles and track individual expense budgets
           </p>
         </div>
         
         {!isAdding && (
-          <div className="flex gap-2">
+          <div className="flex gap-2 self-start sm:self-auto">
             <button
               onClick={() => {
                 if (isEditMode) { setIsEditing(false); setEditError(null); }
                 setIsEditMode(!isEditMode);
               }}
-              className={`inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-2xl transition-all border shadow-sm cursor-pointer ${
+              className={`inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-2xl transition-all border shadow-xs cursor-pointer ${
                 isEditMode
                   ? 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/30 hover:bg-amber-100 dark:hover:bg-amber-900/40'
                   : 'text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-slate-800'
@@ -525,83 +520,17 @@ export default function UserProfileManager({
         )}
       </div>
 
-      {/* Section View Tabs */}
-      <div className="flex items-center gap-2 p-1 bg-slate-100 dark:bg-slate-950/60 rounded-xl w-full sm:w-auto self-start border border-slate-200/50 dark:border-white/5">
-        <button
-          type="button"
-          onClick={() => setSectionFilter('all')}
-          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-            sectionFilter === 'all'
-              ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs'
-              : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-          }`}
-        >
-          All Profiles ({users.length})
-        </button>
-        <button
-          type="button"
-          onClick={() => setSectionFilter('salary')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-            sectionFilter === 'salary'
-              ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-xs'
-              : 'text-slate-500 hover:text-blue-600 dark:hover:text-blue-400'
-          }`}
-        >
-          <CreditCard className="w-3 h-3" />
-          <span>Salary Profiles ({salaryProfiles.length})</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setSectionFilter('inflow')}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-            sectionFilter === 'inflow'
-              ? 'bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shadow-xs'
-              : 'text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400'
-          }`}
-        >
-          <Wallet className="w-3 h-3" />
-          <span>Inflow Profiles ({incomeProfiles.length})</span>
-        </button>
-      </div>
-
       {/* Adding profile form */}
       {isAdding && (
-        <form onSubmit={handleCreate} className="bg-slate-50 dark:bg-slate-950 md:bg-white/30 md:dark:bg-slate-900/20 backdrop-blur-none md:backdrop-blur-md border border-slate-200/50 dark:border-white/10 rounded-2xl p-5 shadow-inner">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-            <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-              Create New Profile
-            </h3>
-            {/* Toggle between Salary Profile & Inflow Profile */}
-            <div className="flex items-center gap-1 bg-slate-200/80 dark:bg-slate-800 p-1 rounded-xl text-xs font-bold self-start">
-              <button
-                type="button"
-                onClick={() => setProfileTypeToAdd('salary')}
-                className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
-                  profileTypeToAdd === 'salary'
-                    ? 'bg-blue-600 text-white shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                💼 Salary Profile
-              </button>
-              <button
-                type="button"
-                onClick={() => setProfileTypeToAdd('inflow')}
-                className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
-                  profileTypeToAdd === 'inflow'
-                    ? 'bg-emerald-600 text-white shadow-xs'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                💰 Inflow Profile
-              </button>
-            </div>
-          </div>
+        <form onSubmit={handleCreate} className="bg-slate-50 dark:bg-slate-950 md:bg-white/30 md:dark:bg-slate-900/20 backdrop-blur-none md:backdrop-blur-md border border-slate-200/50 dark:border-white/10 rounded-2xl p-4 sm:p-5 shadow-inner space-y-4">
+          <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+            Create New User Profile
+          </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
-                {profileTypeToAdd === 'salary' ? 'Full Name / Username' : 'Income Source / Fund Name'}
+                Full Name / Username
               </label>
               <input
                 type="text"
@@ -611,13 +540,13 @@ export default function UserProfileManager({
                   setNewName(e.target.value);
                   if (addError) setAddError(null);
                 }}
-                placeholder={profileTypeToAdd === 'salary' ? 'e.g. Ramesh Kumar' : 'e.g. Savings Fund, Freelance Client, Side Business'}
-                className="w-full text-base md:text-sm px-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
+                placeholder="e.g. Ramesh Kumar"
+                className="w-full text-base md:text-sm px-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 text-slate-800 dark:text-slate-100 transition-all duration-200"
               />
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
-                {profileTypeToAdd === 'salary' ? 'Monthly Base Salary (INR)' : 'Initial Fund Amount (INR)'}
+                Monthly Base Salary (INR)
               </label>
               <div className="relative">
                 <span className="absolute left-4 top-2.5 text-slate-400 dark:text-slate-500 text-sm font-bold">₹</span>
@@ -627,11 +556,11 @@ export default function UserProfileManager({
                   min="1"
                   value={newSalary}
                   onChange={e => setNewSalary(e.target.value)}
-                  placeholder={profileTypeToAdd === 'salary' ? 'e.g. 75000' : 'e.g. 15000'}
-                  className="w-full text-base md:text-sm pl-8 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 font-bold text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
+                  placeholder="e.g. 75000"
+                  className="w-full text-base md:text-sm pl-8 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 font-bold text-slate-800 dark:text-slate-100 transition-all duration-200"
                 />
               </div>
-              {profileTypeToAdd === 'salary' && parseFloat(newSalary) > 0 && (
+              {parseFloat(newSalary) > 0 && (
                 <div className="mt-2.5 bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/40 rounded-2xl p-3 text-xs space-y-1.5 animate-fade-in">
                   <div className="flex items-center justify-between text-[10px] font-black text-blue-800 dark:text-blue-300 uppercase tracking-wider">
                     <span>⚡ Auto 50-30-20 Salary Split</span>
@@ -661,24 +590,22 @@ export default function UserProfileManager({
               )}
             </div>
 
-            {profileTypeToAdd === 'salary' && (
-              <div className="md:col-span-2">
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
-                  Incentive / Bonus (INR, Optional)
-                </label>
-                <div className="relative">
-                  <span className="absolute left-4 top-2.5 text-slate-400 dark:text-slate-500 text-sm font-bold">₹</span>
-                  <input
-                    type="number"
-                    min="0"
-                    value={newIncentive}
-                    onChange={e => setNewIncentive(e.target.value)}
-                    placeholder="e.g. 5000"
-                    className="w-full text-base md:text-sm pl-8 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 font-bold text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
-                  />
-                </div>
+            <div className="md:col-span-2">
+              <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
+                Incentive / Bonus (INR, Optional)
+              </label>
+              <div className="relative">
+                <span className="absolute left-4 top-2.5 text-slate-400 dark:text-slate-500 text-sm font-bold">₹</span>
+                <input
+                  type="number"
+                  min="0"
+                  value={newIncentive}
+                  onChange={e => setNewIncentive(e.target.value)}
+                  placeholder="e.g. 5000"
+                  className="w-full text-base md:text-sm pl-8 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 font-bold text-slate-800 dark:text-slate-100 transition-all duration-200"
+                />
               </div>
-            )}
+            </div>
 
             <div className="md:col-span-2">
               <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
@@ -715,13 +642,15 @@ export default function UserProfileManager({
               </div>
             </div>
           </div>
+
           {addError && (
-            <div className="mb-4 text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30 rounded-xl px-4 py-2.5 flex items-center gap-1.5 animate-fade-in">
+            <div className="text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30 rounded-xl px-4 py-2.5 flex items-center gap-1.5 animate-fade-in">
               <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
               {addError}
             </div>
           )}
-          <div className="flex justify-end gap-2">
+
+          <div className="flex justify-end gap-2 pt-2">
             <button
               type="button"
               onClick={() => {
@@ -736,78 +665,16 @@ export default function UserProfileManager({
               type="submit"
               className="px-4 py-2 text-xs font-black text-white bg-blue-600 hover:bg-blue-500 rounded-xl transition-colors cursor-pointer"
             >
-              Create {profileTypeToAdd === 'salary' ? 'Salary Profile' : 'Inflow Profile'}
+              Create Profile
             </button>
           </div>
         </form>
       )}
 
-      {/* Section 1: Salary Profiles */}
-      {(sectionFilter === 'all' || sectionFilter === 'salary') && (
-        <div className="space-y-3 pt-2">
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-2">
-            <div className="flex items-center gap-2">
-              <span className="w-6 h-6 rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center">
-                <CreditCard className="w-3.5 h-3.5" />
-              </span>
-              <div>
-                <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-white flex items-center gap-2">
-                  Salary & Member Profiles
-                  <span className="text-[10px] font-bold px-2 py-0.2 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300">
-                    {salaryProfiles.length}
-                  </span>
-                </h3>
-                <p className="text-[11px] text-slate-400 dark:text-slate-500">
-                  Tracks base salary budget, 50/30/20 breakdown, and general spend sheets
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {salaryProfiles.map(renderProfileCard)}
-          </div>
-        </div>
-      )}
-
-      {/* Section 2: Inflow & Income Source Profiles */}
-      {(sectionFilter === 'all' || sectionFilter === 'inflow') && (
-        <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-white/5">
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-2">
-            <div className="flex items-center gap-2">
-              <span className="w-6 h-6 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                <Wallet className="w-3.5 h-3.5" />
-              </span>
-              <div>
-                <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-white flex items-center gap-2">
-                  Inflow & Income Fund Profiles
-                  <span className="text-[10px] font-bold px-2 py-0.2 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
-                    {incomeProfiles.length}
-                  </span>
-                </h3>
-                <p className="text-[11px] text-slate-400 dark:text-slate-500">
-                  Dedicated profiles created for external income funds (Savings, Freelance, Bonus, etc.)
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {incomeProfiles.length === 0 ? (
-            <div className="p-4 rounded-2xl bg-emerald-50/40 dark:bg-emerald-950/20 border border-dashed border-emerald-200/80 dark:border-emerald-900/40 text-center space-y-1">
-              <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300">
-                No Inflow Profiles Created Yet
-              </p>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 max-w-md mx-auto">
-                Inflow profiles are optional! You can create one anytime by clicking &quot;Add Profile &gt; 💰 Inflow Profile&quot; or by enabling the profile option in the Income Inflow Tracker.
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {incomeProfiles.map(renderProfileCard)}
-            </div>
-          )}
-        </div>
-      )}
+      {/* Profiles Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5 sm:gap-4">
+        {users.map(renderProfileCard)}
+      </div>
     </div>
   );
 }
