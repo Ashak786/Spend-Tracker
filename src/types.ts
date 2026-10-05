@@ -11,6 +11,8 @@ export interface UserProfile {
     }
   } | null;
   photoUrl?: string;
+  isIncomeProfile?: boolean; // auto-created profile for an incoming fund (e.g. Church Office, Akshay)
+  incomeSourceId?: string; // ID of the linked income source
 }
 
 export type CategoryType =
@@ -29,6 +31,23 @@ export type CategoryType =
 
 export type BudgetBucket = 'Needs' | 'Wants' | 'Savings' | 'None';
 
+export type IncomeCategory =
+  | 'Savings'
+  | 'Freelance & Side Gig'
+  | 'Bonus & Incentives'
+  | 'Other Inflow';
+
+export interface IncomeSource {
+  id: string;
+  userId: string;
+  sourceName: string; // e.g. "Church Office", "My Bro Akshay"
+  amount: number; // total amount received in INR
+  category: IncomeCategory;
+  date: string; // YYYY-MM-DD
+  notes?: string;
+  receivedFrom?: string;
+}
+
 export interface CategoryBudget {
   category: CategoryType;
   limit: number; // budget limit for this category
@@ -41,6 +60,7 @@ export interface Transaction {
   amount: number;
   category: CategoryType;
   budgetBucket?: BudgetBucket;
+  incomeSourceId?: string; // ID of the specific income source used (undefined / 'salary' = Monthly Base Salary)
   date: string; // YYYY-MM-DD
   description?: string;
   isRecurring?: boolean;

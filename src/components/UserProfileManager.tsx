@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { UserProfile } from '../types';
 import { formatCurrency } from '../utils';
-import { Users, Plus, Edit2, Check, X, Trash2, Camera } from 'lucide-react';
+import { Users, Plus, Edit2, Check, X, Trash2, Camera, CreditCard, Wallet, Coins } from 'lucide-react';
 
 const compressImage = (base64Str: string, maxWidth = 120, maxHeight = 120): Promise<string> => {
   return new Promise((resolve) => {
@@ -47,7 +47,14 @@ interface UserProfileManagerProps {
   users: UserProfile[];
   currentUser: UserProfile;
   onSelectUser: (userId: string) => void;
-  onAddUser: (name: string, salary: number, incentive?: number | null, photoUrl?: string) => void;
+  onAddUser: (
+    name: string,
+    salary: number,
+    incentive?: number | null,
+    photoUrl?: string,
+    isIncomeProfile?: boolean,
+    incomeSourceId?: string
+  ) => void;
   onUpdateUser: (updatedUser: UserProfile) => void;
   onDeleteUser: (userId: string) => void;
 }
@@ -61,6 +68,8 @@ export default function UserProfileManager({
   onDeleteUser,
 }: UserProfileManagerProps) {
   const [isAdding, setIsAdding] = useState(false);
+  const [profileTypeToAdd, setProfileTypeToAdd] = useState<'salary' | 'inflow'>('salary');
+  const [sectionFilter, setSectionFilter] = useState<'all' | 'salary' | 'inflow'>('all');
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState('');
   const [newSalary, setNewSalary] = useState('');
@@ -142,11 +151,14 @@ export default function UserProfileManager({
       return;
     }
 
+    const isIncome = profileTypeToAdd === 'inflow';
+
     onAddUser(
       trimmedName,
       salaryNum,
-      isNaN(incentiveNum ?? NaN) ? null : incentiveNum,
-      newPhoto
+      isIncome ? null : (isNaN(incentiveNum ?? NaN) ? null : incentiveNum),
+      newPhoto,
+      isIncome
     );
     setNewName('');
     setNewSalary('');
@@ -182,23 +194,298 @@ export default function UserProfileManager({
       ...currentUser,
       name: trimmedName,
       salary: salaryNum,
-      incentive: isNaN(incentiveNum ?? NaN) ? null : incentiveNum,
+      incentive: currentUser.isIncomeProfile ? null : (isNaN(incentiveNum ?? NaN) ? null : incentiveNum),
       photoUrl: editPhoto,
     });
     setEditError(null);
     setIsEditing(false);
   };
 
+  const salaryProfiles = users.filter(u => !u.isIncomeProfile);
+  const incomeProfiles = users.filter(u => !!u.isIncomeProfile);
+
+  const renderProfileCard = (u: UserProfile) => {
+    const isSelected = u.id === currentUser.id;
+    return (
+      <div
+        key={u.id}
+        className={`relative rounded-2xl sm:rounded-3xl border transition-all flex flex-col justify-between p-4 sm:p-5 ${
+          isSelected
+            ? u.isIncomeProfile
+              ? 'border-emerald-500/80 dark:border-emerald-500/50 bg-emerald-50 dark:bg-emerald-950/40 md:bg-emerald-50/50 md:dark:bg-emerald-950/20 shadow-md md:scale-[1.02] backdrop-blur-none md:backdrop-blur-sm'
+              : 'border-blue-500/80 dark:border-blue-500/50 bg-blue-50 dark:bg-blue-950/40 md:bg-blue-50/50 md:dark:bg-blue-950/20 shadow-md md:scale-[1.02] backdrop-blur-none md:backdrop-blur-sm'
+            : 'border-white/50 dark:border-white/10 bg-white dark:bg-slate-900 md:bg-white/30 md:dark:bg-slate-900/20 backdrop-blur-none md:backdrop-blur-xs opacity-80 hover:opacity-100 hover:bg-white/50 dark:hover:bg-slate-900/40 hover:shadow-xs'
+        }`}
+      >
+        <div className="flex justify-between items-start mb-3 gap-3">
+          {isEditing && isSelected ? (
+            <div className="space-y-2 w-full pr-8">
+              <div className="flex items-center gap-3 mb-3 bg-slate-50 dark:bg-slate-900/60 p-2 rounded-2xl border border-slate-100 dark:border-white/5">
+                <div className="relative group/avatar w-12 h-12 shrink-0">
+                  <img
+                    src={editPhoto || (u.isIncomeProfile
+                      ? `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(u.name)}`
+                      : `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.name)}`)}
+                    alt={u.name}
+                    referrerPolicy="no-referrer"
+                    className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shrink-0 object-cover"
+                  />
+                  <label className="absolute inset-0 flex items-center justify-center bg-black/40 hover:bg-black/60 rounded-xl cursor-pointer opacity-0 group-hover/avatar:opacity-100 transition-opacity">
+                    <Camera className="w-4 h-4 text-white" />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handlePhotoUpload(e, false)}
+                    />
+                  </label>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">Profile Photo</span>
+                  <div className="flex gap-2">
+                    <label className="text-[10px] font-black text-blue-600 dark:text-blue-400 hover:underline cursor-pointer">
+                      Upload Photo
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => handlePhotoUpload(e, false)}
+                      />
+                    </label>
+                    {editPhoto && (
+                      <button
+                        type="button"
+                        onClick={() => setEditPhoto(undefined)}
+                        className="text-[10px] font-black text-rose-500 hover:underline cursor-pointer"
+                      >
+                        Reset
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div>
+                <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 block mb-0.5">Name</span>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={e => {
+                    setEditName(e.target.value);
+                    if (editError) setEditError(null);
+                  }}
+                  className="text-base md:text-xs font-semibold px-3 py-1.5 border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-slate-100"
+                />
+              </div>
+              <div>
+                <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 block mb-0.5">
+                  {u.isIncomeProfile ? 'Fund Amount (INR)' : 'Base Salary (INR)'}
+                </span>
+                <div className="relative">
+                  <span className="absolute left-2.5 top-1.5 text-slate-400 dark:text-slate-500 text-xs">₹</span>
+                  <input
+                    type="number"
+                    value={editSalary}
+                    onChange={e => setEditSalary(e.target.value)}
+                    className="text-base md:text-xs px-6 py-1.5 border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-800 dark:text-slate-100"
+                  />
+                </div>
+                {!u.isIncomeProfile && parseFloat(editSalary) > 0 && (
+                  <div className="mt-1.5 p-2 bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/40 rounded-xl text-[9px] space-y-1">
+                    <div className="font-black text-blue-800 dark:text-blue-300 uppercase">Auto 50-30-20 Split</div>
+                    <div className="grid grid-cols-3 gap-1 text-center font-bold">
+                      <div className="bg-white dark:bg-slate-900 p-1 rounded-lg border border-blue-100 dark:border-blue-900/30">
+                        <span className="text-blue-600 block text-[8px]">50% Needs</span>
+                        <span className="font-mono font-black">{formatCurrency(parseFloat(editSalary) * 0.5)}</span>
+                      </div>
+                      <div className="bg-white dark:bg-slate-900 p-1 rounded-lg border border-purple-100 dark:border-purple-900/30">
+                        <span className="text-purple-600 block text-[8px]">30% Wants</span>
+                        <span className="font-mono font-black">{formatCurrency(parseFloat(editSalary) * 0.3)}</span>
+                      </div>
+                      <div className="bg-white dark:bg-slate-900 p-1 rounded-lg border border-emerald-100 dark:border-emerald-900/30">
+                        <span className="text-emerald-600 block text-[8px]">20% Savings</span>
+                        <span className="font-mono font-black">{formatCurrency(parseFloat(editSalary) * 0.2)}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+              {!u.isIncomeProfile && (
+                <div>
+                  <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 block mb-0.5">Incentive / Bonus (Optional)</span>
+                  <div className="relative">
+                    <span className="absolute left-2.5 top-1.5 text-slate-400 dark:text-slate-500 text-xs">₹</span>
+                    <input
+                      type="number"
+                      value={editIncentive}
+                      onChange={e => setEditIncentive(e.target.value)}
+                      placeholder="0"
+                      className="text-base md:text-xs px-6 py-1.5 border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-800 dark:text-slate-100"
+                    />
+                  </div>
+                </div>
+              )}
+              {editError && (
+                <p className="text-[10px] font-bold text-rose-500 bg-rose-50 dark:bg-rose-950/20 border border-rose-200/50 dark:border-rose-900/30 rounded-lg px-2 py-1 mt-1 animate-fade-in">
+                  {editError}
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <img
+                src={u.photoUrl || (u.isIncomeProfile 
+                  ? `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(u.name)}`
+                  : `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.name)}`)}
+                alt={u.name}
+                referrerPolicy="no-referrer"
+                className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shrink-0 object-cover"
+              />
+              <div>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <h3 className="font-bold text-slate-900 dark:text-white text-sm truncate max-w-[140px]">
+                    {u.name}
+                  </h3>
+                  {u.isIncomeProfile ? (
+                    <span className="text-[8px] font-black px-1.5 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/40">
+                      💰 Inflow Fund
+                    </span>
+                  ) : (
+                    <span className="text-[8px] font-black px-1.5 py-0.5 rounded-md bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/40">
+                      💼 Salary
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs font-mono font-black text-slate-800 dark:text-slate-200 mt-0.5" title="Total effective monthly income">
+                  {formatCurrency(u.salary + (u.incentive || 0))}
+                </p>
+                {u.isIncomeProfile ? (
+                  <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
+                    Income Fund Profile
+                  </p>
+                ) : u.incentive ? (
+                  <div className="text-[9px] text-slate-500 dark:text-slate-400 font-medium leading-normal mt-0.5">
+                    <div>Base: {formatCurrency(u.salary)}</div>
+                    <div className="text-blue-600 dark:text-blue-400 font-semibold">+ Inc / Bonus: {formatCurrency(u.incentive)}</div>
+                  </div>
+                ) : (
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">Base Salary</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Edit Controls */}
+          {isEditMode && (
+            <div className="flex gap-1">
+              {isSelected && (
+                <>
+                  {isEditing ? (
+                    <div className="flex gap-1 absolute top-3 right-3 bg-white/95 dark:bg-slate-900/95 shadow-md border border-slate-200 dark:border-white/10 rounded-xl p-0.5">
+                      <button
+                        onClick={handleSaveEdit}
+                        title="Save Changes"
+                        className="p-1 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-lg transition-colors cursor-pointer"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setIsEditing(false); setEditError(null);
+                        }}
+                        title="Cancel"
+                        className="p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handleStartEdit}
+                      title="Edit Profile"
+                      className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </>
+              )}
+              
+              {/* Delete */}
+              {users.length > 1 && !isEditing && (
+                deletingId === u.id ? (
+                  <div className="flex items-center gap-1 bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/30 rounded-lg p-0.5 animate-fade-in shrink-0">
+                    <button
+                      onClick={() => {
+                        onDeleteUser(u.id);
+                        setDeletingId(null);
+                      }}
+                      className="p-1 text-rose-600 hover:bg-rose-100 dark:hover:bg-rose-900/40 rounded-md transition-colors cursor-pointer"
+                      title="Confirm Delete"
+                    >
+                      <Check className="w-3 h-3 font-bold" />
+                    </button>
+                    <button
+                      onClick={() => setDeletingId(null)}
+                      className="p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition-colors cursor-pointer"
+                      title="Cancel"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setDeletingId(u.id)}
+                    title="Delete Profile"
+                    className="p-1 text-slate-300 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg transition-colors cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                )
+              )}
+            </div>
+          )}
+        </div>
+
+        {!isEditing || !isSelected ? (
+          <div className="mt-2 pt-3 border-t border-slate-150/50 dark:border-white/5 flex items-center justify-between">
+            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
+              {isSelected ? 'Active Account' : 'Inactive'}
+            </span>
+            {!isSelected && (
+              <button
+                onClick={() => onSelectUser(u.id)}
+                className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer shadow-xs active:scale-95 ${
+                  u.isIncomeProfile
+                    ? 'text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 border border-emerald-200 dark:border-emerald-800'
+                    : 'text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 border border-blue-100 dark:border-blue-900/30'
+                }`}
+              >
+                Activate
+              </button>
+            )}
+            {isSelected && (
+              <div className="flex items-center gap-1.5">
+                <span className={`w-2.5 h-2.5 rounded-full animate-pulse ${u.isIncomeProfile ? 'bg-emerald-500' : 'bg-blue-500'}`}></span>
+                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">Current</span>
+              </div>
+            )}
+          </div>
+        ) : null}
+      </div>
+    );
+  };
+
   return (
-    <div className="bg-white dark:bg-slate-900 md:bg-white/50 md:dark:bg-slate-900/40 backdrop-blur-none md:backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-4 sm:p-6 shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300 hover:border-white/90 dark:hover:border-white/20">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <div className="bg-white dark:bg-slate-900 md:bg-white/50 md:dark:bg-slate-900/40 backdrop-blur-none md:backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-4 sm:p-6 shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300 hover:border-white/90 dark:hover:border-white/20 space-y-5">
+      {/* Top Header & Action Controls */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 flex items-center gap-2">
             <Users className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             Switch Active Profile
           </h2>
           <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">
-            Track expenses for different Users
+            Separate sections for Salary Accounts and Inflow of Income Profiles
           </p>
         </div>
         
@@ -209,7 +496,7 @@ export default function UserProfileManager({
                 if (isEditMode) { setIsEditing(false); setEditError(null); }
                 setIsEditMode(!isEditMode);
               }}
-              className={`inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold rounded-2xl transition-all border shadow-sm cursor-pointer ${
+              className={`inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-2xl transition-all border shadow-sm cursor-pointer ${
                 isEditMode
                   ? 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/30 hover:bg-amber-100 dark:hover:bg-amber-900/40'
                   : 'text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-slate-800'
@@ -223,31 +510,98 @@ export default function UserProfileManager({
               ) : (
                 <>
                   <Edit2 className="w-3.5 h-3.5" />
-                  Edit Users
+                  Edit Profiles
                 </>
               )}
             </button>
             <button
               onClick={() => setIsAdding(true)}
-              className="inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-2xl transition-transform hover:scale-105 shadow-md cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 rounded-2xl transition-transform hover:scale-105 shadow-md cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
-              Add New User
+              Add Profile
             </button>
           </div>
         )}
       </div>
 
+      {/* Section View Tabs */}
+      <div className="flex items-center gap-2 p-1 bg-slate-100 dark:bg-slate-950/60 rounded-xl w-full sm:w-auto self-start border border-slate-200/50 dark:border-white/5">
+        <button
+          type="button"
+          onClick={() => setSectionFilter('all')}
+          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            sectionFilter === 'all'
+              ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs'
+              : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+          }`}
+        >
+          All Profiles ({users.length})
+        </button>
+        <button
+          type="button"
+          onClick={() => setSectionFilter('salary')}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            sectionFilter === 'salary'
+              ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-xs'
+              : 'text-slate-500 hover:text-blue-600 dark:hover:text-blue-400'
+          }`}
+        >
+          <CreditCard className="w-3 h-3" />
+          <span>Salary Profiles ({salaryProfiles.length})</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setSectionFilter('inflow')}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            sectionFilter === 'inflow'
+              ? 'bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shadow-xs'
+              : 'text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400'
+          }`}
+        >
+          <Wallet className="w-3 h-3" />
+          <span>Inflow Profiles ({incomeProfiles.length})</span>
+        </button>
+      </div>
+
       {/* Adding profile form */}
       {isAdding && (
-        <form onSubmit={handleCreate} className="bg-slate-50 dark:bg-slate-950 md:bg-white/30 md:dark:bg-slate-900/20 backdrop-blur-none md:backdrop-blur-md border border-slate-200/50 dark:border-white/10 rounded-2xl p-5 mb-6 shadow-inner">
-          <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 mb-4 uppercase tracking-widest">
-            Create Profile
-          </h3>
+        <form onSubmit={handleCreate} className="bg-slate-50 dark:bg-slate-950 md:bg-white/30 md:dark:bg-slate-900/20 backdrop-blur-none md:backdrop-blur-md border border-slate-200/50 dark:border-white/10 rounded-2xl p-5 shadow-inner">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+            <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+              Create New Profile
+            </h3>
+            {/* Toggle between Salary Profile & Inflow Profile */}
+            <div className="flex items-center gap-1 bg-slate-200/80 dark:bg-slate-800 p-1 rounded-xl text-xs font-bold self-start">
+              <button
+                type="button"
+                onClick={() => setProfileTypeToAdd('salary')}
+                className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
+                  profileTypeToAdd === 'salary'
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                💼 Salary Profile
+              </button>
+              <button
+                type="button"
+                onClick={() => setProfileTypeToAdd('inflow')}
+                className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
+                  profileTypeToAdd === 'inflow'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                💰 Inflow Profile
+              </button>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
               <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
-                Full Name / Username
+                {profileTypeToAdd === 'salary' ? 'Full Name / Username' : 'Income Source / Fund Name'}
               </label>
               <input
                 type="text"
@@ -257,13 +611,13 @@ export default function UserProfileManager({
                   setNewName(e.target.value);
                   if (addError) setAddError(null);
                 }}
-                placeholder="e.g. Ramesh Kumar"
+                placeholder={profileTypeToAdd === 'salary' ? 'e.g. Ramesh Kumar' : 'e.g. Savings Fund, Freelance Client, Side Business'}
                 className="w-full text-base md:text-sm px-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
               />
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
-                Monthly Base Salary (INR)
+                {profileTypeToAdd === 'salary' ? 'Monthly Base Salary (INR)' : 'Initial Fund Amount (INR)'}
               </label>
               <div className="relative">
                 <span className="absolute left-4 top-2.5 text-slate-400 dark:text-slate-500 text-sm font-bold">₹</span>
@@ -273,11 +627,11 @@ export default function UserProfileManager({
                   min="1"
                   value={newSalary}
                   onChange={e => setNewSalary(e.target.value)}
-                  placeholder="e.g. 75000"
+                  placeholder={profileTypeToAdd === 'salary' ? 'e.g. 75000' : 'e.g. 15000'}
                   className="w-full text-base md:text-sm pl-8 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 font-bold text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
                 />
               </div>
-              {parseFloat(newSalary) > 0 && (
+              {profileTypeToAdd === 'salary' && parseFloat(newSalary) > 0 && (
                 <div className="mt-2.5 bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/40 rounded-2xl p-3 text-xs space-y-1.5 animate-fade-in">
                   <div className="flex items-center justify-between text-[10px] font-black text-blue-800 dark:text-blue-300 uppercase tracking-wider">
                     <span>⚡ Auto 50-30-20 Salary Split</span>
@@ -306,25 +660,29 @@ export default function UserProfileManager({
                 </div>
               )}
             </div>
-            <div className="md:col-span-2">
-              <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
-                Incentive / Bonus (INR, Optional)
-              </label>
-              <div className="relative">
-                <span className="absolute left-4 top-2.5 text-slate-400 dark:text-slate-500 text-sm font-bold">₹</span>
-                <input
-                  type="number"
-                  min="0"
-                  value={newIncentive}
-                  onChange={e => setNewIncentive(e.target.value)}
-                  placeholder="e.g. 5000"
-                  className="w-full text-base md:text-sm pl-8 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 font-bold text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
-                />
+
+            {profileTypeToAdd === 'salary' && (
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
+                  Incentive / Bonus (INR, Optional)
+                </label>
+                <div className="relative">
+                  <span className="absolute left-4 top-2.5 text-slate-400 dark:text-slate-500 text-sm font-bold">₹</span>
+                  <input
+                    type="number"
+                    min="0"
+                    value={newIncentive}
+                    onChange={e => setNewIncentive(e.target.value)}
+                    placeholder="e.g. 5000"
+                    className="w-full text-base md:text-sm pl-8 pr-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-slate-100 dark:bg-slate-900/60 font-bold text-slate-800 dark:text-slate-100 focus:bg-white/90 dark:focus:bg-slate-900/80 transition-all duration-200"
+                  />
+                </div>
               </div>
-            </div>
+            )}
+
             <div className="md:col-span-2">
               <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
-                Profile Photo (Optional)
+                Profile Photo / Avatar (Optional)
               </label>
               <div className="flex items-center gap-4 bg-slate-100 dark:bg-slate-900/60 p-3 border border-slate-200/60 dark:border-white/10 rounded-2xl">
                 <div className="relative w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden flex items-center justify-center shrink-0">
@@ -378,255 +736,78 @@ export default function UserProfileManager({
               type="submit"
               className="px-4 py-2 text-xs font-black text-white bg-blue-600 hover:bg-blue-500 rounded-xl transition-colors cursor-pointer"
             >
-              Create Profile
+              Create {profileTypeToAdd === 'salary' ? 'Salary Profile' : 'Inflow Profile'}
             </button>
           </div>
         </form>
       )}
 
-      {/* Switcher & Edit list */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {users.map(u => {
-          const isSelected = u.id === currentUser.id;
-          return (
-            <div
-              key={u.id}
-              className={`relative rounded-2xl sm:rounded-3xl border transition-all flex flex-col justify-between p-4 sm:p-5 ${
-                isSelected
-                  ? 'border-blue-500/80 dark:border-blue-500/50 bg-blue-50 dark:bg-blue-950/40 md:bg-blue-50/50 md:dark:bg-blue-950/20 shadow-md md:scale-[1.02] backdrop-blur-none md:backdrop-blur-sm'
-                  : 'border-white/50 dark:border-white/10 bg-white dark:bg-slate-900 md:bg-white/30 md:dark:bg-slate-900/20 backdrop-blur-none md:backdrop-blur-xs opacity-80 hover:opacity-100 hover:bg-white/50 dark:hover:bg-slate-900/40 hover:shadow-xs'
-              }`}
-            >
-              <div className="flex justify-between items-start mb-3 gap-3">
-                {isEditing && isSelected ? (
-                  <div className="space-y-2 w-full pr-8">
-                    <div className="flex items-center gap-3 mb-3 bg-slate-50 dark:bg-slate-900/60 p-2 rounded-2xl border border-slate-100 dark:border-white/5">
-                      <div className="relative group/avatar w-12 h-12 shrink-0">
-                        <img
-                          src={editPhoto || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.name)}`}
-                          alt={u.name}
-                          referrerPolicy="no-referrer"
-                          className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shrink-0 object-cover"
-                        />
-                        <label className="absolute inset-0 flex items-center justify-center bg-black/40 hover:bg-black/60 rounded-xl cursor-pointer opacity-0 group-hover/avatar:opacity-100 transition-opacity">
-                          <Camera className="w-4 h-4 text-white" />
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(e) => handlePhotoUpload(e, false)}
-                          />
-                        </label>
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">Profile Photo</span>
-                        <div className="flex gap-2">
-                          <label className="text-[10px] font-black text-blue-600 dark:text-blue-400 hover:underline cursor-pointer">
-                            Upload Photo
-                            <input
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              onChange={(e) => handlePhotoUpload(e, false)}
-                            />
-                          </label>
-                          {editPhoto && (
-                            <button
-                              type="button"
-                              onClick={() => setEditPhoto(undefined)}
-                              className="text-[10px] font-black text-rose-500 hover:underline cursor-pointer"
-                            >
-                              Reset
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 block mb-0.5">Name</span>
-                      <input
-                        type="text"
-                        value={editName}
-                        onChange={e => {
-                          setEditName(e.target.value);
-                          if (editError) setEditError(null);
-                        }}
-                        className="text-base md:text-xs font-semibold px-3 py-1.5 border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-slate-100"
-                      />
-                    </div>
-                    <div>
-                      <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 block mb-0.5">Base Salary</span>
-                      <div className="relative">
-                        <span className="absolute left-2.5 top-1.5 text-slate-400 dark:text-slate-500 text-xs">₹</span>
-                        <input
-                          type="number"
-                          value={editSalary}
-                          onChange={e => setEditSalary(e.target.value)}
-                          className="text-base md:text-xs px-6 py-1.5 border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-800 dark:text-slate-100"
-                        />
-                      </div>
-                      {parseFloat(editSalary) > 0 && (
-                        <div className="mt-1.5 p-2 bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/40 rounded-xl text-[9px] space-y-1">
-                          <div className="font-black text-blue-800 dark:text-blue-300 uppercase">Auto 50-30-20 Split</div>
-                          <div className="grid grid-cols-3 gap-1 text-center font-bold">
-                            <div className="bg-white dark:bg-slate-900 p-1 rounded-lg border border-blue-100 dark:border-blue-900/30">
-                              <span className="text-blue-600 block text-[8px]">50% Needs</span>
-                              <span className="font-mono font-black">{formatCurrency(parseFloat(editSalary) * 0.5)}</span>
-                            </div>
-                            <div className="bg-white dark:bg-slate-900 p-1 rounded-lg border border-purple-100 dark:border-purple-900/30">
-                              <span className="text-purple-600 block text-[8px]">30% Wants</span>
-                              <span className="font-mono font-black">{formatCurrency(parseFloat(editSalary) * 0.3)}</span>
-                            </div>
-                            <div className="bg-white dark:bg-slate-900 p-1 rounded-lg border border-emerald-100 dark:border-emerald-900/30">
-                              <span className="text-emerald-600 block text-[8px]">20% Savings</span>
-                              <span className="font-mono font-black">{formatCurrency(parseFloat(editSalary) * 0.2)}</span>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    <div>
-                      <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 block mb-0.5">Incentive / Bonus (Optional)</span>
-                      <div className="relative">
-                        <span className="absolute left-2.5 top-1.5 text-slate-400 dark:text-slate-500 text-xs">₹</span>
-                        <input
-                          type="number"
-                          value={editIncentive}
-                          onChange={e => setEditIncentive(e.target.value)}
-                          placeholder="0"
-                          className="text-base md:text-xs px-6 py-1.5 border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-slate-800 dark:text-slate-100"
-                        />
-                      </div>
-                    </div>
-                    {editError && (
-                      <p className="text-[10px] font-bold text-rose-500 bg-rose-50 dark:bg-rose-950/20 border border-rose-200/50 dark:border-rose-900/30 rounded-lg px-2 py-1 mt-1 animate-fade-in">
-                        {editError}
-                      </p>
-                    )}
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={u.photoUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.name)}`}
-                      alt={u.name}
-                      referrerPolicy="no-referrer"
-                      className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shrink-0 object-cover"
-                    />
-                    <div>
-                      <h3 className="font-bold text-slate-900 dark:text-white text-sm truncate max-w-[140px]">
-                        {u.name}
-                      </h3>
-                      <p className="text-xs font-mono font-black text-slate-800 dark:text-slate-200 mt-0.5" title="Total effective monthly income">
-                        {formatCurrency(u.salary + (u.incentive || 0))}
-                      </p>
-                      {u.incentive ? (
-                        <div className="text-[9px] text-slate-500 dark:text-slate-400 font-medium leading-normal mt-0.5">
-                          <div>Base: {formatCurrency(u.salary)}</div>
-                          <div className="text-blue-600 dark:text-blue-400 font-semibold">+ Inc / Bonus: {formatCurrency(u.incentive)}</div>
-                        </div>
-                      ) : (
-                        <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">Base Salary</p>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Edit Controls */}
-                {isEditMode && (
-                  <div className="flex gap-1">
-                    {isSelected && (
-                      <>
-                        {isEditing ? (
-                          <div className="flex gap-1 absolute top-3 right-3 bg-white/95 dark:bg-slate-900/95 shadow-md border border-slate-200 dark:border-white/10 rounded-xl p-0.5">
-                            <button
-                              onClick={handleSaveEdit}
-                              title="Save Changes"
-                              className="p-1 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 rounded-lg transition-colors cursor-pointer"
-                            >
-                              <Check className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => {
-                                { setIsEditing(false); setEditError(null); }
-                              }}
-                              title="Cancel"
-                              className="p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
-                            >
-                              <X className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={handleStartEdit}
-                            title="Edit Profile"
-                            className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors cursor-pointer"
-                          >
-                            <Edit2 className="w-3.5 h-3.5" />
-                          </button>
-                        )}
-                      </>
-                    )}
-                    
-                    {/* Delete (only show for non-selected users or if there is > 1 user) */}
-                    {users.length > 1 && !isEditing && (
-                      deletingId === u.id ? (
-                        <div className="flex items-center gap-1 bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/30 rounded-lg p-0.5 animate-fade-in shrink-0">
-                          <button
-                            onClick={() => {
-                              onDeleteUser(u.id);
-                              setDeletingId(null);
-                            }}
-                            className="p-1 text-rose-600 hover:bg-rose-100 dark:hover:bg-rose-900/40 rounded-md transition-colors cursor-pointer"
-                            title="Confirm Delete"
-                          >
-                            <Check className="w-3 h-3 font-bold" />
-                          </button>
-                          <button
-                            onClick={() => setDeletingId(null)}
-                            className="p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md transition-colors cursor-pointer"
-                            title="Cancel"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => setDeletingId(u.id)}
-                          title="Delete Profile"
-                          className="p-1 text-slate-300 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg transition-colors cursor-pointer"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      )
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {!isEditing || !isSelected ? (
-                <div className="mt-2 pt-3 border-t border-slate-150/50 dark:border-white/5 flex items-center justify-between">
-                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
-                    {isSelected ? 'Active Account' : 'Inactive'}
+      {/* Section 1: Salary Profiles */}
+      {(sectionFilter === 'all' || sectionFilter === 'salary') && (
+        <div className="space-y-3 pt-2">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-2">
+            <div className="flex items-center gap-2">
+              <span className="w-6 h-6 rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                <CreditCard className="w-3.5 h-3.5" />
+              </span>
+              <div>
+                <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-white flex items-center gap-2">
+                  Salary & Member Profiles
+                  <span className="text-[10px] font-bold px-2 py-0.2 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300">
+                    {salaryProfiles.length}
                   </span>
-                  {!isSelected && (
-                    <button
-                      onClick={() => onSelectUser(u.id)}
-                      className="px-3 py-1.5 text-xs font-bold text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 border border-blue-100 dark:border-blue-900/30 rounded-xl transition-all cursor-pointer"
-                    >
-                      Activate
-                    </button>
-                  )}
-                  {isSelected && (
-                    <div className="flex items-center gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse"></span>
-                    </div>
-                  )}
-                </div>
-              ) : null}
+                </h3>
+                <p className="text-[11px] text-slate-400 dark:text-slate-500">
+                  Tracks base salary budget, 50/30/20 breakdown, and general spend sheets
+                </p>
+              </div>
             </div>
-          );
-        })}
-      </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {salaryProfiles.map(renderProfileCard)}
+          </div>
+        </div>
+      )}
+
+      {/* Section 2: Inflow & Income Source Profiles */}
+      {(sectionFilter === 'all' || sectionFilter === 'inflow') && (
+        <div className="space-y-3 pt-4 border-t border-slate-100 dark:border-white/5">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-2">
+            <div className="flex items-center gap-2">
+              <span className="w-6 h-6 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                <Wallet className="w-3.5 h-3.5" />
+              </span>
+              <div>
+                <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-white flex items-center gap-2">
+                  Inflow & Income Fund Profiles
+                  <span className="text-[10px] font-bold px-2 py-0.2 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
+                    {incomeProfiles.length}
+                  </span>
+                </h3>
+                <p className="text-[11px] text-slate-400 dark:text-slate-500">
+                  Dedicated profiles created for external income funds (Savings, Freelance, Bonus, etc.)
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {incomeProfiles.length === 0 ? (
+            <div className="p-4 rounded-2xl bg-emerald-50/40 dark:bg-emerald-950/20 border border-dashed border-emerald-200/80 dark:border-emerald-900/40 text-center space-y-1">
+              <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300">
+                No Inflow Profiles Created Yet
+              </p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+                Inflow profiles are optional! You can create one anytime by clicking &quot;Add Profile &gt; 💰 Inflow Profile&quot; or by enabling the profile option in the Income Inflow Tracker.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {incomeProfiles.map(renderProfileCard)}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -4,23 +4,27 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { UserProfile, Transaction } from './types';
+import { UserProfile, Transaction, IncomeSource } from './types';
 import { getCurrentMonthKey, getCurrentDateKey } from './utils';
 import UserProfileManager from './components/UserProfileManager';
 import DashboardOverview from './components/DashboardOverview';
 import ExpenseCategoryList from './components/ExpenseCategoryList';
 import TransactionForm from './components/TransactionForm';
 import TransactionList from './components/TransactionList';
+import IncomeTracker from './components/IncomeTracker';
 import { LogoFull } from './components/Logo';
-import { IndianRupee, HelpCircle, Sparkles, BookOpen, CreditCard, X, Plus } from 'lucide-react';
+import { IndianRupee, HelpCircle, Sparkles, BookOpen, CreditCard, X, Plus, ArrowDownLeft, Wallet } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   subscribeUsers,
   subscribeTransactions,
+  subscribeIncomes,
   saveUserProfile,
   deleteUserProfileAndData,
   saveTransaction,
   deleteTransactionFromDb,
+  saveIncomeSource,
+  deleteIncomeSourceFromDb,
   wipeAllDataFromDb
 } from './firebase';
 
@@ -32,6 +36,9 @@ export default function App() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [incomes, setIncomes] = useState<IncomeSource[]>([]);
+  const [activeSection, setActiveSection] = useState<'salary_tracker' | 'income_tracker'>('salary_tracker');
+  const [preselectedIncomeId, setPreselectedIncomeId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonthKey);
   const [isConfirmingClear, setIsConfirmingClear] = useState(false);
@@ -72,9 +79,14 @@ export default function App() {
       setTransactions(fetchedTxs);
     });
 
+    const unsubscribeIncomes = subscribeIncomes((fetchedIncomes) => {
+      setIncomes(fetchedIncomes);
+    });
+
     return () => {
       unsubscribeUsers();
       unsubscribeTxs();
+      unsubscribeIncomes();
     };
   }, []);
 
@@ -173,15 +185,24 @@ export default function App() {
     }
   };
 
-  // Handler to add a new profile
-  const handleAddUser = (name: string, salary: number, incentive?: number | null, photoUrl?: string) => {
+  // Handler to add a new user profile (supports both Salary and Inflow profiles)
+  const handleAddUser = (
+    name: string,
+    salary: number,
+    incentive?: number | null,
+    photoUrl?: string,
+    isIncomeProfile?: boolean,
+    incomeSourceId?: string
+  ) => {
     const newUser: UserProfile = {
-      id: `user-${Date.now()}`,
+      id: isIncomeProfile && incomeSourceId ? `profile-inc-${incomeSourceId}` : `user-${Date.now()}`,
       name,
       salary,
       incentive: incentive ?? null,
       joinedAt: getCurrentDateKey(),
       photoUrl,
+      isIncomeProfile: !!isIncomeProfile,
+      incomeSourceId: incomeSourceId || undefined,
     };
     setUsers(prev => [...prev, newUser]);
     setCurrentUser(newUser); // Automatically switch to the newly created profile
@@ -214,8 +235,10 @@ export default function App() {
 
   // Handler to record a transaction
   const handleAddTransaction = (newTxData: Omit<Transaction, 'id'>) => {
+    // Keep transaction under active account with incomeSourceId linked
     const newTx: Transaction = {
       ...newTxData,
+      userId: currentUser ? currentUser.id : newTxData.userId,
       id: `tx-${Date.now()}`,
     };
     
@@ -249,11 +272,112 @@ export default function App() {
     saveTransaction(updatedTx).catch(err => console.error('Failed to update transaction:', err));
   };
 
-  // Only get transactions belonging to the current active user
+  // Income Inflow Handlers (Optionally create a dedicated profile if user requested, no auto creation)
+  const handleAddIncome = (newIncomeData: Omit<IncomeSource, 'id'>, createProfile?: boolean) => {
+    const newId = `inc-${Date.now()}`;
+    const newIncome: IncomeSource = {
+      ...newIncomeData,
+      id: newId,
+    };
+    setIncomes(prev => [newIncome, ...prev]);
+    saveIncomeSource(newIncome).catch(err => console.error('Failed to save income source:', err));
+
+    // Only create profile if user explicitly opted in
+    if (createProfile) {
+      const profileId = `profile-inc-${newId}`;
+      const userProfile: UserProfile = {
+        id: profileId,
+        name: newIncomeData.sourceName,
+        salary: newIncomeData.amount,
+        joinedAt: newIncomeData.date,
+        isIncomeProfile: true,
+        incomeSourceId: newId,
+        photoUrl: `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(newIncomeData.sourceName)}`
+      };
+      setUsers(prev => [...prev, userProfile]);
+      saveUserProfile(userProfile).catch(err => console.error('Failed to create profile for income:', err));
+    }
+  };
+
+  // Handler to create a profile for an existing income source on demand
+  const handleCreateProfileForIncome = (income: IncomeSource) => {
+    const profileId = `profile-inc-${income.id}`;
+    const existing = users.find(u => u.id === profileId || u.incomeSourceId === income.id);
+    if (existing) {
+      setCurrentUser(existing);
+      return;
+    }
+    const userProfile: UserProfile = {
+      id: profileId,
+      name: income.sourceName,
+      salary: income.amount,
+      joinedAt: income.date,
+      isIncomeProfile: true,
+      incomeSourceId: income.id,
+      photoUrl: `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(income.sourceName)}`
+    };
+    setUsers(prev => [...prev, userProfile]);
+    setCurrentUser(userProfile);
+    saveUserProfile(userProfile).catch(err => console.error('Failed to create profile for income:', err));
+  };
+
+  const handleUpdateIncome = (updatedIncome: IncomeSource) => {
+    setIncomes(prev => prev.map(i => i.id === updatedIncome.id ? updatedIncome : i));
+    saveIncomeSource(updatedIncome).catch(err => console.error('Failed to update income source:', err));
+
+    const profileId = `profile-inc-${updatedIncome.id}`;
+    const existingProfile = users.find(u => u.id === profileId || u.incomeSourceId === updatedIncome.id);
+    if (existingProfile) {
+      saveUserProfile({
+        ...existingProfile,
+        name: updatedIncome.sourceName,
+        salary: updatedIncome.amount,
+        isIncomeProfile: true,
+        incomeSourceId: updatedIncome.id,
+      }).catch(err => console.error('Failed to update profile for income:', err));
+    }
+  };
+
+  const handleDeleteIncome = async (id: string) => {
+    setIncomes(prev => prev.filter(i => i.id !== id));
+    const profileId = `profile-inc-${id}`;
+    await deleteUserProfileAndData(profileId);
+    await deleteIncomeSourceFromDb(id);
+  };
+
+  const handleSelectIncomeToSpend = (incomeSourceId: string) => {
+    setPreselectedIncomeId(incomeSourceId);
+    setActiveSection('salary_tracker');
+    // Open mobile modal if viewport is mobile
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      setIsMobileFormOpen(true);
+    }
+  };
+
+  // Only get transactions belonging to the current active user or linked to this income profile
   const currentUserTransactions = React.useMemo(() => {
     if (!currentUser) return [];
+    if (currentUser.isIncomeProfile && currentUser.incomeSourceId) {
+      return transactions.filter(t => t.incomeSourceId === currentUser.incomeSourceId || t.userId === currentUser.id);
+    }
     return transactions.filter(t => t.userId === currentUser.id);
   }, [transactions, currentUser]);
+
+  // Salary Spend Tracker transactions: STRICTLY only transactions paid from salary (not external funds)
+  const salaryTransactions = React.useMemo(() => {
+    if (!currentUser) return [];
+    if (currentUser.isIncomeProfile) {
+      return currentUserTransactions;
+    }
+    // Base salary profile: exclude any transactions paid from an external income source!
+    return currentUserTransactions.filter(t => !t.incomeSourceId || t.incomeSourceId === 'salary');
+  }, [currentUserTransactions, currentUser]);
+
+  // Only get incomes belonging to the current active user
+  const currentUserIncomes = React.useMemo(() => {
+    if (!currentUser) return [];
+    return incomes.filter(i => i.userId === currentUser.id);
+  }, [incomes, currentUser]);
 
   // Calculate available months from current user's logged transactions (to populate dropdown)
   // Ensures the current month and any transaction/monthlyIncome months are included
@@ -439,51 +563,122 @@ export default function App() {
               />
             </section>
 
-            {/* Dashboard and Core Controls Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-start">
-              
-              {/* Left Column (Stats & Visualizations) - 7 cols on large screens */}
-              <div className="lg:col-span-7 space-y-4 sm:space-y-6">
-                <section id="dashboard-overview-section">
-                  <DashboardOverview
-                    currentUser={currentUser}
-                    transactions={currentUserTransactions}
-                    selectedMonth={selectedMonth}
-                    onMonthChange={setSelectedMonth}
-                    availableMonths={availableMonths}
-                    onUpdateUser={handleUpdateUser}
-                  />
-                </section>
+            {/* Section Switcher Tabs: Salary Spend Tracker vs Income Inflows & Sources */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 md:bg-white/50 md:dark:bg-slate-900/40 backdrop-blur-none md:backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-2xl p-2 shadow-xs">
+              <div className="flex items-center gap-2 p-1 bg-slate-100 dark:bg-slate-950/60 rounded-xl w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveSection('salary_tracker');
+                    setPreselectedIncomeId(null);
+                  }}
+                  className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-black transition-all cursor-pointer ${
+                    activeSection === 'salary_tracker'
+                      ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <CreditCard className="w-3.5 h-3.5" />
+                  <span>Salary Spend Tracker</span>
+                </button>
 
-                <section id="category-distribution-section">
-                  <ExpenseCategoryList
-                    transactions={currentUserTransactions}
-                    selectedMonth={selectedMonth}
-                  />
-                </section>
+                <button
+                  type="button"
+                  onClick={() => setActiveSection('income_tracker')}
+                  className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-black transition-all cursor-pointer ${
+                    activeSection === 'income_tracker'
+                      ? 'bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shadow-sm'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <ArrowDownLeft className="w-3.5 h-3.5" />
+                  <span>Income Inflow Tracker</span>
+                  {currentUserIncomes.length > 0 && (
+                    <span className="text-[10px] font-black px-1.5 py-0.2 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
+                      {currentUserIncomes.length}
+                    </span>
+                  )}
+                </button>
               </div>
 
-              {/* Right Column (Recording & Log sheets) - 5 cols on large screens */}
-              <div className="lg:col-span-5 space-y-4 sm:space-y-6">
-                <section id="record-expense-section" className="hidden md:block">
-                  <TransactionForm
-                    userId={currentUser.id}
-                    onAddTransaction={handleAddTransaction}
-                    selectedMonth={selectedMonth}
-                  />
-                </section>
-
-                <section id="transactions-log-section">
-                  <TransactionList
-                    currentUser={currentUser}
-                    transactions={currentUserTransactions}
-                    selectedMonth={selectedMonth}
-                    onDeleteTransaction={handleDeleteTransaction}
-                    onUpdateTransaction={handleUpdateTransaction}
-                  />
-                </section>
+              {/* Status highlight in tab bar */}
+              <div className="hidden sm:flex items-center gap-2 text-xs font-semibold px-2 text-slate-500 dark:text-slate-400">
+                {activeSection === 'salary_tracker' ? (
+                  <span>Tracking base salary & 50/30/20 budgets</span>
+                ) : (
+                  <span>Tracking incoming funds & allocations</span>
+                )}
               </div>
             </div>
+
+            {/* View Switching: Salary Spend Tracker vs Income Inflow Tracker */}
+            {activeSection === 'salary_tracker' ? (
+              /* Dashboard and Core Controls Grid */
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-start">
+                
+                {/* Left Column (Stats & Visualizations) - 7 cols on large screens */}
+                <div className="lg:col-span-7 space-y-4 sm:space-y-6">
+                  <section id="dashboard-overview-section">
+                    <DashboardOverview
+                      currentUser={currentUser}
+                      transactions={salaryTransactions}
+                      selectedMonth={selectedMonth}
+                      onMonthChange={setSelectedMonth}
+                      availableMonths={availableMonths}
+                      onUpdateUser={handleUpdateUser}
+                    />
+                  </section>
+
+                  <section id="category-distribution-section">
+                    <ExpenseCategoryList
+                      transactions={salaryTransactions}
+                      selectedMonth={selectedMonth}
+                    />
+                  </section>
+                </div>
+
+                {/* Right Column (Recording & Log sheets) - 5 cols on large screens */}
+                <div className="lg:col-span-5 space-y-4 sm:space-y-6">
+                  <section id="record-expense-section" className="hidden md:block">
+                    <TransactionForm
+                      userId={currentUser.id}
+                      onAddTransaction={handleAddTransaction}
+                      selectedMonth={selectedMonth}
+                      incomes={currentUserIncomes}
+                      transactions={transactions}
+                      preselectedIncomeId={preselectedIncomeId}
+                    />
+                  </section>
+
+                  <section id="transactions-log-section">
+                    <TransactionList
+                      currentUser={currentUser}
+                      transactions={currentUserTransactions}
+                      selectedMonth={selectedMonth}
+                      incomes={currentUserIncomes}
+                      onDeleteTransaction={handleDeleteTransaction}
+                      onUpdateTransaction={handleUpdateTransaction}
+                    />
+                  </section>
+                </div>
+              </div>
+            ) : (
+              <section id="income-tracker-section">
+                <IncomeTracker
+                  currentUser={currentUser}
+                  incomes={currentUserIncomes}
+                  transactions={transactions}
+                  users={users}
+                  onAddIncome={handleAddIncome}
+                  onUpdateIncome={handleUpdateIncome}
+                  onDeleteIncome={handleDeleteIncome}
+                  onSelectIncomeToSpend={handleSelectIncomeToSpend}
+                  onAddTransaction={handleAddTransaction}
+                  onCreateProfile={handleCreateProfileForIncome}
+                  onSelectUser={handleSelectUser}
+                />
+              </section>
+            )}
           </>
         )}
 
@@ -532,7 +727,10 @@ export default function App() {
                     </h3>
                   </div>
                   <button
-                    onClick={() => setIsMobileFormOpen(false)}
+                    onClick={() => {
+                      setIsMobileFormOpen(false);
+                      setPreselectedIncomeId(null);
+                    }}
                     className="p-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 rounded-xl cursor-pointer transition-colors"
                   >
                     <X className="w-5 h-5" />
@@ -543,9 +741,15 @@ export default function App() {
                 <TransactionForm
                   userId={currentUser!.id}
                   onAddTransaction={handleAddTransaction}
-                  onSuccess={() => setIsMobileFormOpen(false)}
+                  onSuccess={() => {
+                    setIsMobileFormOpen(false);
+                    setPreselectedIncomeId(null);
+                  }}
                   selectedMonth={selectedMonth}
                   isModal={true}
+                  incomes={currentUserIncomes}
+                  transactions={currentUserTransactions}
+                  preselectedIncomeId={preselectedIncomeId}
                 />
               </motion.div>
             </>

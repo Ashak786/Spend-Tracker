@@ -12,7 +12,7 @@ import {
   getDocs,
   getDocFromServer
 } from 'firebase/firestore';
-import { UserProfile, Transaction } from './types';
+import { UserProfile, Transaction, IncomeSource } from './types';
 import firebaseConfig from '../firebase-applet-config.json';
 
 // Initialize Firebase App
@@ -27,6 +27,7 @@ export const db = initializeFirestore(app, {
 // Define Collections
 const USERS_COL = 'users';
 const TRANSACTIONS_COL = 'transactions';
+const INCOMES_COL = 'incomes';
 
 // --- Error Handling Interface & Helper (As required by Firebase Integration Skill) ---
 export enum OperationType {
@@ -126,6 +127,24 @@ export function subscribeTransactions(onUpdate: (transactions: Transaction[]) =>
 }
 
 /**
+ * Syncs income inflows from Firestore in real-time.
+ */
+export function subscribeIncomes(onUpdate: (incomes: IncomeSource[]) => void) {
+  const q = collection(db, INCOMES_COL);
+  return onSnapshot(q, (snapshot) => {
+    const items: IncomeSource[] = [];
+    snapshot.forEach((doc) => {
+      items.push(doc.data() as IncomeSource);
+    });
+    // Sort incomes by date descending, then ID descending
+    items.sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+    onUpdate(items);
+  }, (error) => {
+    handleFirestoreError(error, OperationType.GET, INCOMES_COL);
+  });
+}
+
+/**
  * Saves or updates a user profile in Firestore.
  */
 export async function saveUserProfile(user: UserProfile) {
@@ -138,7 +157,7 @@ export async function saveUserProfile(user: UserProfile) {
 }
 
 /**
- * Deletes a user profile and all associated transactions in a single atomic batch operation.
+ * Deletes a user profile and all associated transactions and incomes in a single atomic batch operation.
  */
 export async function deleteUserProfileAndData(userId: string) {
   const userRef = doc(db, USERS_COL, userId);
@@ -153,10 +172,17 @@ export async function deleteUserProfileAndData(userId: string) {
       batch.delete(doc.ref);
     });
 
+    // Query and delete all income docs for this user
+    const incomeQuery = query(collection(db, INCOMES_COL), where('userId', '==', userId));
+    const incomeSnapshot = await getDocs(incomeQuery);
+    incomeSnapshot.forEach((doc) => {
+      batch.delete(doc.ref);
+    });
+
     // Commit the batch
     await batch.commit();
   } catch (error) {
-    handleFirestoreError(error, OperationType.DELETE, `user_${userId}_and_transactions`);
+    handleFirestoreError(error, OperationType.DELETE, `user_${userId}_and_data`);
   }
 }
 
@@ -185,7 +211,31 @@ export async function deleteTransactionFromDb(id: string) {
 }
 
 /**
- * Wipes all data (users and transactions) from Firestore for clean slate.
+ * Saves an income source/inflow in Firestore.
+ */
+export async function saveIncomeSource(income: IncomeSource) {
+  const ref = doc(db, INCOMES_COL, income.id);
+  try {
+    await setDoc(ref, income, { merge: true });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, `${INCOMES_COL}/${income.id}`);
+  }
+}
+
+/**
+ * Deletes an income source/inflow from Firestore.
+ */
+export async function deleteIncomeSourceFromDb(id: string) {
+  const ref = doc(db, INCOMES_COL, id);
+  try {
+    await deleteDoc(ref);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `${INCOMES_COL}/${id}`);
+  }
+}
+
+/**
+ * Wipes all data (users, transactions, and incomes) from Firestore for clean slate.
  */
 export async function wipeAllDataFromDb() {
   try {
@@ -200,6 +250,12 @@ export async function wipeAllDataFromDb() {
     // Get and delete all transactions
     const txSnapshot = await getDocs(collection(db, TRANSACTIONS_COL));
     txSnapshot.forEach((doc) => {
+      batch.delete(doc.ref);
+    });
+
+    // Get and delete all incomes
+    const incomeSnapshot = await getDocs(collection(db, INCOMES_COL));
+    incomeSnapshot.forEach((doc) => {
       batch.delete(doc.ref);
     });
 

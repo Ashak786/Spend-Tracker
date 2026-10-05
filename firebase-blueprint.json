@@ -24,9 +24,25 @@
         "title": { "type": "string", "description": "Title of the spend" },
         "amount": { "type": "number", "description": "Amount spent" },
         "category": { "type": "string", "description": "Category of spend" },
-        "date": { "type": "string", "description": "Date of transaction (YYYY-MM-DD)" }
+        "date": { "type": "string", "description": "Date of transaction (YYYY-MM-DD)" },
+        "incomeSourceId": { "type": "string", "description": "Optional income source ID that funded this expense", "nullable": true }
       },
       "required": ["id", "userId", "title", "amount", "category", "date"]
+    },
+    "IncomeSource": {
+      "title": "IncomeSource",
+      "description": "Income inflow entry tracking incoming funds from different sources",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for income inflow" },
+        "userId": { "type": "string", "description": "User ID this income belongs to" },
+        "sourceName": { "type": "string", "description": "Name or sender of income source (e.g. Church Office, Akshay)" },
+        "amount": { "type": "number", "description": "Amount received in INR" },
+        "date": { "type": "string", "description": "Date received (YYYY-MM-DD)" },
+        "category": { "type": "string", "description": "Category of inflow" },
+        "notes": { "type": "string", "description": "Optional notes or details", "nullable": true }
+      },
+      "required": ["id", "userId", "sourceName", "amount", "date"]
     }
   },
   "firestore": {
@@ -37,6 +53,10 @@
     "transactions/{transactionId}": {
       "schema": "Transaction",
       "description": "User transactions list"
+    },
+    "incomes/{incomeId}": {
+      "schema": "IncomeSource",
+      "description": "Income inflows and sources list"
     }
   }
 }

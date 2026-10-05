@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Transaction, UserProfile, CategoryType, BudgetBucket } from '../types';
+import { Transaction, UserProfile, CategoryType, BudgetBucket, IncomeSource } from '../types';
 import { formatCurrency, formatIndianDate, exportToPDF, formatMonthYear, getDefaultBudgetBucket } from '../utils';
 import { CATEGORY_META } from './ExpenseCategoryList';
-import { Search, Download, Trash2, CalendarRange, Inbox, Filter, Check, X, Pencil } from 'lucide-react';
+import { Search, Download, Trash2, CalendarRange, Inbox, Filter, Check, X, Pencil, Wallet } from 'lucide-react';
 
 interface TransactionListProps {
   currentUser: UserProfile;
   transactions: Transaction[];
   selectedMonth: string;
+  incomes?: IncomeSource[];
   onDeleteTransaction: (id: string) => void;
   onUpdateTransaction: (tx: Transaction) => void;
 }
@@ -16,12 +17,14 @@ export default function TransactionList({
   currentUser,
   transactions,
   selectedMonth,
+  incomes = [],
   onDeleteTransaction,
   onUpdateTransaction,
 }: TransactionListProps) {
   const [isExporting, setIsExporting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('All');
+  const [sourceFilter, setSourceFilter] = useState<'all' | 'salary' | 'inflow'>('all');
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   // States for editing a transaction
@@ -30,6 +33,7 @@ export default function TransactionList({
   const [editAmount, setEditAmount] = useState('');
   const [editCategory, setEditCategory] = useState<CategoryType>('Other Expenses');
   const [editBucket, setEditBucket] = useState<BudgetBucket>('Needs');
+  const [editIncomeSourceId, setEditIncomeSourceId] = useState<string>('salary');
   const [editDate, setEditDate] = useState('');
   const [editDescription, setEditDescription] = useState('');
 
@@ -40,6 +44,7 @@ export default function TransactionList({
       setEditAmount(editingTx.amount.toString());
       setEditCategory(editingTx.category);
       setEditBucket(editingTx.budgetBucket || getDefaultBudgetBucket(editingTx.category));
+      setEditIncomeSourceId(editingTx.incomeSourceId || 'salary');
       setEditDate(editingTx.date);
       setEditDescription(editingTx.description || '');
     }
@@ -77,8 +82,18 @@ export default function TransactionList({
     const matchesCategory =
       selectedCategoryFilter === 'All' || t.category === selectedCategoryFilter;
 
-    return matchesSearch && matchesCategory;
+    const matchesSource =
+      sourceFilter === 'all'
+        ? true
+        : sourceFilter === 'salary'
+        ? (!t.incomeSourceId || t.incomeSourceId === 'salary')
+        : (t.incomeSourceId && t.incomeSourceId !== 'salary');
+
+    return matchesSearch && matchesCategory && matchesSource;
   });
+
+  const salaryCount = monthlyTransactions.filter(t => !t.incomeSourceId || t.incomeSourceId === 'salary').length;
+  const inflowCount = monthlyTransactions.filter(t => t.incomeSourceId && t.incomeSourceId !== 'salary').length;
 
   const totalFilteredSpent = filteredTransactions.reduce((sum, t) => sum + t.amount, 0);
 
@@ -176,6 +191,43 @@ export default function TransactionList({
         </div>
       </div>
 
+      {/* Funding Source Switcher Pills */}
+      <div className="flex items-center gap-1.5 flex-wrap">
+        <button
+          type="button"
+          onClick={() => setSourceFilter('all')}
+          className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            sourceFilter === 'all'
+              ? 'bg-blue-600 text-white shadow-xs'
+              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+          }`}
+        >
+          All ({monthlyTransactions.length})
+        </button>
+        <button
+          type="button"
+          onClick={() => setSourceFilter('salary')}
+          className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            sourceFilter === 'salary'
+              ? 'bg-blue-600 text-white shadow-xs'
+              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+          }`}
+        >
+          💼 Salary Spent ({salaryCount})
+        </button>
+        <button
+          type="button"
+          onClick={() => setSourceFilter('inflow')}
+          className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            sourceFilter === 'inflow'
+              ? 'bg-emerald-600 text-white shadow-xs'
+              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+          }`}
+        >
+          💰 From Inflows ({inflowCount})
+        </button>
+      </div>
+
       {/* Table / List Container */}
       <div className="overflow-x-auto">
         {filteredTransactions.length === 0 ? (
@@ -237,6 +289,19 @@ export default function TransactionList({
                               </span>
                             );
                           }
+                        })()}
+
+                        {t.incomeSourceId && (() => {
+                          const inc = incomes.find(i => i.id === t.incomeSourceId);
+                          return (
+                            <span
+                              className="text-[9px] font-black px-1.5 py-0.5 rounded-md bg-amber-100 dark:bg-amber-950/70 text-amber-800 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/50 flex items-center gap-1"
+                              title={`Paid using money from: ${inc ? inc.sourceName : 'Income Source'}`}
+                            >
+                              <span>💰</span>
+                              <span className="truncate max-w-[120px]">{inc ? inc.sourceName : 'Income'}</span>
+                            </span>
+                          );
                         })()}
                       </div>
                       <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold truncate mt-0.5" title={t.description}>
@@ -354,6 +419,7 @@ export default function TransactionList({
                   amount: Number(parsedAmount.toFixed(2)),
                   category: editCategory,
                   budgetBucket: editBucket,
+                  incomeSourceId: editIncomeSourceId === 'salary' ? undefined : editIncomeSourceId,
                   date: editDate,
                   description: editDescription.trim() || undefined,
                 });
@@ -432,6 +498,31 @@ export default function TransactionList({
                     ))}
                   </select>
                 </div>
+              </div>
+
+              {/* Funded From / Income Source Dropdown in Edit Modal */}
+              <div>
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <Wallet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                    <span>Funded From / Income Source</span>
+                  </span>
+                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
+                    {editIncomeSourceId === 'salary' ? 'Base Salary' : 'Income Inflow'}
+                  </span>
+                </label>
+                <select
+                  value={editIncomeSourceId}
+                  onChange={(e) => setEditIncomeSourceId(e.target.value)}
+                  className="w-full text-base md:text-sm px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-slate-100 dark:bg-slate-800 cursor-pointer font-bold text-slate-800 dark:text-slate-200 focus:bg-white dark:focus:bg-slate-900 transition-colors duration-150"
+                >
+                  <option value="salary">💼 Monthly Base Salary (Default Ledger)</option>
+                  {incomes.map((inc) => (
+                    <option key={inc.id} value={inc.id}>
+                      💰 {inc.sourceName} (Total: {formatCurrency(inc.amount)})
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* 50/30/20 Budget Bucket Selector in Edit Modal */}
