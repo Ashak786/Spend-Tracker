@@ -594,18 +594,17 @@ export default function App() {
                       userId={currentUser.id}
                       onAddTransaction={handleAddTransaction}
                       selectedMonth={selectedMonth}
-                      incomes={currentUserIncomes}
+                      incomes={[]}
                       transactions={transactions}
-                      preselectedIncomeId={preselectedIncomeId}
+                      preselectedIncomeId={null}
                     />
                   </section>
 
                   <section id="transactions-log-section">
                     <TransactionList
                       currentUser={currentUser}
-                      transactions={currentUserTransactions}
+                      transactions={salaryTransactions}
                       selectedMonth={selectedMonth}
-                      incomes={currentUserIncomes}
                       onDeleteTransaction={handleDeleteTransaction}
                       onUpdateTransaction={handleUpdateTransaction}
                     />
@@ -624,6 +623,8 @@ export default function App() {
                   onDeleteIncome={handleDeleteIncome}
                   onSelectIncomeToSpend={handleSelectIncomeToSpend}
                   onAddTransaction={handleAddTransaction}
+                  onDeleteTransaction={handleDeleteTransaction}
+                  onUpdateTransaction={handleUpdateTransaction}
                   onSelectUser={handleSelectUser}
                 />
               </section>
@@ -750,57 +751,81 @@ export default function App() {
 
         {/* Mobile Bottom Navigation Dock */}
         {currentUser && (
-          <nav className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/80 dark:border-white/10 px-4 py-2 flex items-center justify-around shadow-2xl">
+          <nav className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/90 dark:border-white/10 px-2 pt-2 pb-[max(0.6rem,env(safe-area-inset-bottom))] shadow-[0_-4px_24px_rgba(15,23,42,0.08)] dark:shadow-[0_-4px_24px_rgba(0,0,0,0.5)] grid grid-cols-4 items-center">
+            {/* Tab 1: Salary Tracker */}
             <button
+              type="button"
               onClick={() => {
                 setActiveSection('salary_tracker');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className={`flex flex-col items-center gap-1 p-1.5 rounded-xl transition-all cursor-pointer ${
+              className={`flex flex-col items-center justify-center min-h-[48px] w-full py-1 rounded-xl transition-all cursor-pointer tap-highlight-transparent select-none active:scale-95 ${
                 activeSection === 'salary_tracker'
                   ? 'text-blue-600 dark:text-blue-400 font-bold'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 font-medium'
               }`}
+              aria-label="Salary Tracker"
             >
-              <CreditCard className="w-5 h-5" />
-              <span className="text-[10px] font-black tracking-tight">Salary</span>
+              <CreditCard className="w-5 h-5 transition-transform" />
+              <span className="text-[10px] tracking-tight mt-1">Salary</span>
+              {activeSection === 'salary_tracker' && (
+                <span className="w-1.5 h-1 rounded-full bg-blue-600 dark:bg-blue-400 mt-0.5" />
+              )}
             </button>
 
+            {/* Tab 2: Income Inflows */}
             <button
-              onClick={() => setIsMobileFormOpen(true)}
-              className="flex items-center justify-center -mt-6 bg-blue-600 active:bg-blue-700 text-white rounded-2xl w-13 h-12 shadow-lg border-2 border-white dark:border-slate-900 cursor-pointer active:scale-90 transition-transform"
-              aria-label="Add Expense"
-            >
-              <Plus className="w-6 h-6" />
-            </button>
-
-            <button
+              type="button"
               onClick={() => {
                 setActiveSection('income_tracker');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className={`flex flex-col items-center gap-1 p-1.5 rounded-xl transition-all cursor-pointer relative ${
+              className={`flex flex-col items-center justify-center min-h-[48px] w-full py-1 rounded-xl transition-all cursor-pointer tap-highlight-transparent select-none active:scale-95 relative ${
                 activeSection === 'income_tracker'
                   ? 'text-emerald-600 dark:text-emerald-400 font-bold'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 font-medium'
               }`}
+              aria-label="Income Inflows"
             >
-              <ArrowDownLeft className="w-5 h-5" />
-              <span className="text-[10px] font-black tracking-tight">Inflows</span>
-              {currentUserIncomes.length > 0 && (
-                <span className="absolute top-1 right-2 w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <div className="relative">
+                <ArrowDownLeft className="w-5 h-5 transition-transform" />
+                {currentUserIncomes.length > 0 && (
+                  <span className="absolute -top-1 -right-2 px-1 min-w-[14px] h-3.5 rounded-full bg-emerald-500 text-white text-[9px] font-black flex items-center justify-center leading-none shadow-xs">
+                    {currentUserIncomes.length}
+                  </span>
+                )}
+              </div>
+              <span className="text-[10px] tracking-tight mt-1">Inflows</span>
+              {activeSection === 'income_tracker' && (
+                <span className="w-1.5 h-1 rounded-full bg-emerald-600 dark:bg-emerald-400 mt-0.5" />
               )}
             </button>
 
+            {/* Tab 3: Quick Add Expense Action */}
             <button
+              type="button"
+              onClick={() => setIsMobileFormOpen(true)}
+              className="flex flex-col items-center justify-center min-h-[48px] w-full py-1 cursor-pointer tap-highlight-transparent select-none group"
+              aria-label="Record New Expense"
+            >
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-blue-500 active:from-blue-700 active:to-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/25 group-active:scale-90 transition-transform">
+                <Plus className="w-5 h-5 stroke-[2.5]" />
+              </div>
+              <span className="text-[9px] font-bold text-slate-600 dark:text-slate-300 mt-0.5">Add</span>
+            </button>
+
+            {/* Tab 4: Profiles */}
+            <button
+              type="button"
               onClick={() => {
                 const el = document.getElementById('profile-management-section');
                 if (el) el.scrollIntoView({ behavior: 'smooth' });
               }}
-              className="flex flex-col items-center gap-1 p-1.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer"
+              className="flex flex-col items-center justify-center min-h-[48px] w-full py-1 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 font-medium cursor-pointer tap-highlight-transparent select-none active:scale-95"
+              aria-label="User Profiles"
             >
-              <Users className="w-5 h-5" />
-              <span className="text-[10px] font-black tracking-tight">Profiles</span>
+              <Users className="w-5 h-5 transition-transform" />
+              <span className="text-[10px] tracking-tight mt-1">Profiles</span>
             </button>
           </nav>
         )}

@@ -192,57 +192,55 @@ export default function TransactionForm({
         </div>
       </div>
 
-      {/* Funded From / Income Source Dropdown */}
-      <div>
-        <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 flex items-center justify-between">
-          <span className="flex items-center gap-1.5">
-            <Wallet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-            <span>Funded From / Income Source</span>
-          </span>
-          <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
-            {incomeSourceId === 'salary' ? 'Base Salary Ledger' : 'Specific Inflow Stream'}
-          </span>
-        </label>
-        <select
-          value={incomeSourceId}
-          onChange={e => setIncomeSourceId(e.target.value)}
-          className="w-full text-base md:text-sm px-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-slate-100 dark:bg-slate-900/60 cursor-pointer font-bold text-slate-800 dark:text-slate-200 focus:bg-white/90 dark:focus:bg-slate-900/90 transition-all duration-200"
-        >
-          <option value="salary">💼 Monthly Base Salary (Default Ledger)</option>
-          {incomes.map(inc => {
-            const spent = transactions.filter(t => t.incomeSourceId === inc.id).reduce((sum, t) => sum + t.amount, 0);
-            const rem = inc.amount - spent;
-            return (
-              <option key={inc.id} value={inc.id}>
-                💰 {inc.sourceName} — {formatCurrency(rem)} available (Total: {formatCurrency(inc.amount)})
-              </option>
-            );
-          })}
-        </select>
-        
-        {/* Helper preview info */}
-        {selectedIncomeObj ? (
-          <div className={`mt-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium flex items-center justify-between gap-2 ${
-            isOverIncomeBalance 
-              ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900/50' 
-              : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-900/50'
-          }`}>
-            <span className="flex items-center gap-1">
-              {isOverIncomeBalance ? <AlertCircle className="w-3.5 h-3.5 shrink-0" /> : <Wallet className="w-3.5 h-3.5 shrink-0" />}
-              <span>
-                Using money from <strong className="font-bold">{selectedIncomeObj.sourceName}</strong>
+      {/* Funded From / Income Source Dropdown (Only shown when recording from an Inflow stream) */}
+      {incomes && incomes.length > 0 && (
+        <div>
+          <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 flex items-center justify-between">
+            <span className="flex items-center gap-1.5">
+              <Wallet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              <span>Funded From / Income Source</span>
+            </span>
+            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
+              {incomeSourceId === 'salary' ? 'Base Salary Ledger' : 'Specific Inflow Stream'}
+            </span>
+          </label>
+          <select
+            value={incomeSourceId}
+            onChange={e => setIncomeSourceId(e.target.value)}
+            className="w-full text-base md:text-sm px-4 py-2.5 border border-slate-200/60 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-slate-100 dark:bg-slate-900/60 cursor-pointer font-bold text-slate-800 dark:text-slate-200 focus:bg-white/90 dark:focus:bg-slate-900/90 transition-all duration-200"
+          >
+            <option value="salary">💼 Monthly Base Salary (Default Ledger)</option>
+            {incomes.map(inc => {
+              const spent = transactions.filter(t => t.incomeSourceId === inc.id).reduce((sum, t) => sum + t.amount, 0);
+              const rem = inc.amount - spent;
+              return (
+                <option key={inc.id} value={inc.id}>
+                  💰 {inc.sourceName} — {formatCurrency(rem)} available (Total: {formatCurrency(inc.amount)})
+                </option>
+              );
+            })}
+          </select>
+          
+          {/* Helper preview info */}
+          {selectedIncomeObj && (
+            <div className={`mt-1.5 px-3 py-1.5 rounded-xl text-[11px] font-medium flex items-center justify-between gap-2 ${
+              isOverIncomeBalance 
+                ? 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900/50' 
+                : 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-900/50'
+            }`}>
+              <span className="flex items-center gap-1">
+                {isOverIncomeBalance ? <AlertCircle className="w-3.5 h-3.5 shrink-0" /> : <Wallet className="w-3.5 h-3.5 shrink-0" />}
+                <span>
+                  Using money from <strong className="font-bold">{selectedIncomeObj.sourceName}</strong>
+                </span>
               </span>
-            </span>
-            <span className="font-bold shrink-0">
-              {formatCurrency(selectedIncomeRemaining)} remaining
-            </span>
-          </div>
-        ) : (
-          <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
-            Tracked against your standard monthly base salary & 50/30/20 budget.
-          </p>
-        )}
-      </div>
+              <span className="font-bold shrink-0">
+                {formatCurrency(selectedIncomeRemaining)} remaining
+              </span>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Manual 50/30/20 Budget Bucket Selector */}
       <div>

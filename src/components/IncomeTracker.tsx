@@ -53,6 +53,8 @@ interface IncomeTrackerProps {
   onDeleteIncome: (id: string) => void;
   onSelectIncomeToSpend?: (incomeSourceId: string) => void;
   onAddTransaction: (transaction: Omit<Transaction, 'id'>) => void;
+  onDeleteTransaction?: (id: string) => void;
+  onUpdateTransaction?: (tx: Transaction) => void;
   onCreateProfile?: (income: IncomeSource) => void;
   onSelectUser?: (userId: string) => void;
 }
@@ -67,6 +69,8 @@ export default function IncomeTracker({
   onDeleteIncome,
   onSelectIncomeToSpend,
   onAddTransaction,
+  onDeleteTransaction,
+  onUpdateTransaction,
   onCreateProfile,
   onSelectUser,
 }: IncomeTrackerProps) {
@@ -76,6 +80,16 @@ export default function IncomeTracker({
   const [spendingIncome, setSpendingIncome] = useState<IncomeSource | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [expandedSourceId, setExpandedSourceId] = useState<string | null>(null);
+
+  // States for editing a transaction linked to an income source
+  const [editingTx, setEditingTx] = useState<Transaction | null>(null);
+  const [editTxTitle, setEditTxTitle] = useState('');
+  const [editTxAmount, setEditTxAmount] = useState('');
+  const [editTxCategory, setEditTxCategory] = useState<any>('Food & Groceries');
+  const [editTxBucket, setEditTxBucket] = useState<'Needs' | 'Wants' | 'Savings' | 'None'>('Needs');
+  const [editTxDate, setEditTxDate] = useState('');
+  const [editTxDescription, setEditTxDescription] = useState('');
+  const [deletingTxId, setDeletingTxId] = useState<string | null>(null);
 
   // Form states
   const [sourceName, setSourceName] = useState('');
@@ -226,6 +240,39 @@ export default function IncomeTracker({
     });
 
     setSpendingIncome(null);
+  };
+
+  const isEditTxEquation = /[\+\-\*\/]/.test(editTxAmount);
+  const evaluatedEditTxAmount = evaluateMath(editTxAmount);
+
+  const handleStartEditTx = (tx: Transaction) => {
+    setEditingTx(tx);
+    setEditTxTitle(tx.title);
+    setEditTxAmount(tx.amount.toString());
+    setEditTxCategory(tx.category);
+    setEditTxBucket(tx.budgetBucket || 'Needs');
+    setEditTxDate(tx.date);
+    setEditTxDescription(tx.description || '');
+  };
+
+  const handleSaveEditTx = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingTx || !editTxTitle.trim() || !editTxAmount || !editTxDate) return;
+    const evaluated = evaluateMath(editTxAmount);
+    const parsedAmount = evaluated !== null ? evaluated : parseFloat(editTxAmount);
+    if (isNaN(parsedAmount) || parsedAmount <= 0) return;
+
+    onUpdateTransaction?.({
+      ...editingTx,
+      title: editTxTitle.trim(),
+      amount: Number(parsedAmount.toFixed(2)),
+      category: editTxCategory,
+      budgetBucket: editTxBucket,
+      date: editTxDate,
+      description: editTxDescription.trim() || undefined,
+    });
+
+    setEditingTx(null);
   };
 
   return (
@@ -498,9 +545,9 @@ export default function IncomeTracker({
                               return (
                                 <div
                                   key={tx.id}
-                                  className="flex items-center justify-between p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-white/5 text-xs"
+                                  className="flex items-center justify-between p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-white/5 text-xs gap-2"
                                 >
-                                  <div className="flex items-center gap-2.5 min-w-0">
+                                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
                                     <span className={`p-1.5 rounded-lg shrink-0 ${catMeta.bg} ${catMeta.color}`}>
                                       <IconComponent className="w-3.5 h-3.5" />
                                     </span>
@@ -508,14 +555,60 @@ export default function IncomeTracker({
                                       <p className="font-bold text-slate-900 dark:text-white truncate">
                                         {tx.title}
                                       </p>
-                                      <p className="text-[10px] text-slate-400 dark:text-slate-500">
+                                      <p className="text-[10px] text-slate-400 dark:text-slate-500 truncate">
                                         {formatIndianDate(tx.date)} • {tx.category} {tx.description ? `• ${tx.description}` : ''}
                                       </p>
                                     </div>
                                   </div>
 
-                                  <div className="font-mono font-black text-slate-900 dark:text-white shrink-0 ml-2">
-                                    {formatCurrency(tx.amount)}
+                                  <div className="flex items-center gap-2 shrink-0">
+                                    <span className="font-mono font-black text-slate-900 dark:text-white">
+                                      {formatCurrency(tx.amount)}
+                                    </span>
+
+                                    <div className="flex items-center gap-1 border-l border-slate-200/60 dark:border-white/10 pl-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleStartEditTx(tx)}
+                                        className="p-1.5 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                                        title="Edit expense"
+                                      >
+                                        <Pencil className="w-3.5 h-3.5" />
+                                      </button>
+
+                                      {deletingTxId === tx.id ? (
+                                        <div className="flex items-center gap-1 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 p-0.5 rounded-lg">
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              onDeleteTransaction?.(tx.id);
+                                              setDeletingTxId(null);
+                                            }}
+                                            className="p-1 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900 rounded-md cursor-pointer"
+                                            title="Confirm delete expense"
+                                          >
+                                            <Check className="w-3 h-3" />
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={() => setDeletingTxId(null)}
+                                            className="p-1 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-md cursor-pointer"
+                                            title="Cancel"
+                                          >
+                                            <X className="w-3 h-3" />
+                                          </button>
+                                        </div>
+                                      ) : (
+                                        <button
+                                          type="button"
+                                          onClick={() => setDeletingTxId(tx.id)}
+                                          className="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                                          title="Delete expense"
+                                        >
+                                          <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
                               );
@@ -974,6 +1067,195 @@ export default function IncomeTracker({
           </div>
         );
       })()}
+
+      {/* Modal: Edit Expense Funded by this Income */}
+      {editingTx && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 animate-in fade-in duration-150">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/50">
+              <div className="flex items-center gap-2">
+                <Pencil className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <h3 className="text-xs font-black uppercase tracking-widest text-slate-800 dark:text-white">
+                  Edit Expense Record
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingTx(null)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 hover:bg-slate-200/60 dark:hover:bg-slate-800/60 rounded-lg cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEditTx} className="p-6 space-y-4 text-left">
+              <div>
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
+                  Expense Title / Payee
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editTxTitle}
+                  onChange={e => setEditTxTitle(e.target.value)}
+                  placeholder="e.g. Flight Ticket, Freelance Tool"
+                  className="w-full text-base md:text-sm px-4 py-2.5 border border-slate-200/80 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-100 dark:bg-slate-800 font-bold text-slate-800 dark:text-white"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1 flex justify-between items-center">
+                    <span>Amount (INR)</span>
+                    {isEditTxEquation && evaluatedEditTxAmount !== null && (
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">Math Mode</span>
+                    )}
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-2.5 text-slate-400 dark:text-slate-500 text-sm font-black">₹</span>
+                    <input
+                      type="text"
+                      required
+                      value={editTxAmount}
+                      onChange={e => setEditTxAmount(e.target.value)}
+                      placeholder="0.00"
+                      className="w-full text-base md:text-sm pl-8 pr-4 py-2.5 border border-slate-200/80 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-100 dark:bg-slate-800 font-bold text-slate-800 dark:text-white"
+                    />
+                  </div>
+                  {isEditTxEquation && (
+                    <div className="mt-1 text-[11px] font-black text-emerald-600 dark:text-emerald-400">
+                      {evaluatedEditTxAmount !== null ? `= ${formatCurrency(evaluatedEditTxAmount)}` : 'Enter valid formula...'}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
+                    Expense Category
+                  </label>
+                  <select
+                    value={editTxCategory}
+                    onChange={e => setEditTxCategory(e.target.value as any)}
+                    className="w-full text-base md:text-sm px-4 py-2.5 border border-slate-200/80 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-100 dark:bg-slate-800 font-bold text-slate-800 dark:text-white cursor-pointer"
+                  >
+                    {Object.keys(CATEGORY_META).map(cat => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* 50 / 30 / 20 Budget Bucket */}
+              <div>
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5 flex items-center justify-between">
+                  <span>50 / 30 / 20 Budget Allocation</span>
+                  <span className="text-[10px] text-blue-600 dark:text-blue-400 font-bold">Rule Split</span>
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditTxBucket('Needs')}
+                    className={`py-2 px-1.5 rounded-2xl border text-xs font-black transition-all cursor-pointer flex flex-col items-center gap-0.5 ${
+                      editTxBucket === 'Needs'
+                        ? 'bg-blue-600 text-white border-blue-600 shadow-md scale-[1.02]'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    <span>🏠 50% Needs</span>
+                    <span className="text-[9px] font-medium opacity-80">Essentials</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setEditTxBucket('Wants')}
+                    className={`py-2 px-1.5 rounded-2xl border text-xs font-black transition-all cursor-pointer flex flex-col items-center gap-0.5 ${
+                      editTxBucket === 'Wants'
+                        ? 'bg-purple-600 text-white border-purple-600 shadow-md scale-[1.02]'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    <span>🛍️ 30% Wants</span>
+                    <span className="text-[9px] font-medium opacity-80">Lifestyle</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setEditTxBucket('Savings')}
+                    className={`py-2 px-1.5 rounded-2xl border text-xs font-black transition-all cursor-pointer flex flex-col items-center gap-0.5 ${
+                      editTxBucket === 'Savings'
+                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-md scale-[1.02]'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    <span>📈 20% Savings</span>
+                    <span className="text-[9px] font-medium opacity-80">Investments</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setEditTxBucket('None')}
+                    className={`py-2 px-1.5 rounded-2xl border text-xs font-black transition-all cursor-pointer flex flex-col items-center gap-0.5 ${
+                      editTxBucket === 'None'
+                        ? 'bg-slate-700 text-white border-slate-700 shadow-md scale-[1.02] dark:bg-slate-200 dark:text-slate-900 dark:border-slate-200'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    <span>💳 Normal</span>
+                    <span className="text-[9px] font-medium opacity-80">No Split</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Date & Note */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
+                    Date of Expense
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    value={editTxDate}
+                    onChange={e => setEditTxDate(e.target.value)}
+                    className="w-full text-base md:text-sm px-4 py-2.5 border border-slate-200/80 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-100 dark:bg-slate-800 font-bold text-slate-800 dark:text-white cursor-pointer"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
+                    Note / Description <span className="text-slate-400 font-normal">(Optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={editTxDescription}
+                    onChange={e => setEditTxDescription(e.target.value)}
+                    placeholder="e.g. Paid via UPI"
+                    className="w-full text-base md:text-sm px-4 py-2.5 border border-slate-200/80 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-100 dark:bg-slate-800 font-bold text-slate-800 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setEditingTx(null)}
+                  className="px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 text-xs font-black text-white bg-blue-600 hover:bg-blue-500 rounded-xl shadow-md cursor-pointer transition-transform hover:scale-105"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
