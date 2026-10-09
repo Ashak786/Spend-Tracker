@@ -57,6 +57,7 @@ interface UserProfileManagerProps {
   ) => void;
   onUpdateUser: (updatedUser: UserProfile) => void;
   onDeleteUser: (userId: string) => void;
+  onNavigateSection?: (section: 'salary' | 'inflows') => void;
 }
 
 export default function UserProfileManager({
@@ -66,6 +67,7 @@ export default function UserProfileManager({
   onAddUser,
   onUpdateUser,
   onDeleteUser,
+  onNavigateSection,
 }: UserProfileManagerProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -459,9 +461,20 @@ export default function UserProfileManager({
               </button>
             )}
             {isSelected && (
-              <div className="flex items-center gap-1.5">
-                <span className={`w-2.5 h-2.5 rounded-full animate-pulse ${u.isIncomeProfile ? 'bg-emerald-500' : 'bg-blue-500'}`}></span>
-                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">Current</span>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
+                  <span className={`w-2.5 h-2.5 rounded-full animate-pulse ${u.isIncomeProfile ? 'bg-emerald-500' : 'bg-blue-500'}`}></span>
+                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">Current</span>
+                </div>
+                {onNavigateSection && (
+                  <button
+                    type="button"
+                    onClick={() => onNavigateSection(u.isIncomeProfile ? 'inflows' : 'salary')}
+                    className="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:underline cursor-pointer bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 rounded-lg border border-blue-100 dark:border-blue-900/30 transition-colors"
+                  >
+                    View Tracker →
+                  </button>
+                )}
               </div>
             )}
           </div>

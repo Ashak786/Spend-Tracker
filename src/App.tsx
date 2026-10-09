@@ -13,6 +13,7 @@ import TransactionForm from './components/TransactionForm';
 import TransactionList from './components/TransactionList';
 import IncomeTracker from './components/IncomeTracker';
 import { LogoFull } from './components/Logo';
+import PINEntry from './components/PINEntry';
 import { IndianRupee, HelpCircle, Sparkles, BookOpen, CreditCard, X, Plus, ArrowDownLeft, Wallet, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -37,12 +38,13 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [incomes, setIncomes] = useState<IncomeSource[]>([]);
-  const [activeSection, setActiveSection] = useState<'salary_tracker' | 'income_tracker'>('salary_tracker');
+  const [activeSection, setActiveSection] = useState<'salary_tracker' | 'income_tracker' | 'profiles'>('salary_tracker');
   const [preselectedIncomeId, setPreselectedIncomeId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonthKey);
   const [isConfirmingClear, setIsConfirmingClear] = useState(false);
   const [isMobileFormOpen, setIsMobileFormOpen] = useState(false);
+  const [isPinVerified, setIsPinVerified] = useState(false);
 
   // Listen to system appearance theme changes and apply 'dark' class accordingly
   useEffect(() => {
@@ -362,6 +364,24 @@ export default function App() {
     setSelectedMonth(getCurrentMonthKey());
   };
 
+  // Smoothly switch section when navigation buttons are clicked
+  const handleNavRedirect = (target: 'salary' | 'inflows' | 'profiles') => {
+    if (target === 'profiles') {
+      setActiveSection('profiles');
+      return;
+    }
+
+    const nextSection = target === 'salary' ? 'salary_tracker' : 'income_tracker';
+    setActiveSection(nextSection);
+    if (target === 'salary') {
+      setPreselectedIncomeId(null);
+    }
+  };
+
+  if (!isPinVerified) {
+    return <PINEntry onVerify={() => setIsPinVerified(true)} />;
+  }
+
   return (
     <div className="min-h-screen relative overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans selection:bg-blue-50 dark:selection:bg-blue-950/40 selection:text-blue-900 transition-colors duration-300 pb-20 md:pb-0">
       {/* Beautiful ambient glowing spots for Glassmorphism matching the brand palette */}
@@ -374,7 +394,7 @@ export default function App() {
       <div className="h-1.5 w-full bg-gradient-to-r from-blue-700 via-orange-500 to-blue-800 relative z-10 animate-pulse" />
 
       {/* Main Workspace container */}
-      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-4 sm:space-y-6 relative z-10 pb-28 md:pb-8">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-4 sm:space-y-6 relative z-10 pb-32 md:pb-8">
         
         {/* Header section as a Bento Card with elevated branding & profile status */}
         <header className="bg-white dark:bg-slate-900 md:bg-white/50 md:dark:bg-slate-900/40 backdrop-blur-none md:backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl sm:rounded-[32px] p-4 sm:p-5 shadow-[0_8px_32px_rgba(15,23,42,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300 hover:border-white/95 dark:hover:border-white/15">
@@ -384,7 +404,13 @@ export default function App() {
             </div>
 
             {currentUser && (
-              <div id="header-user-badge" className="flex items-center gap-2 sm:gap-3 bg-white/40 dark:bg-slate-950/20 px-3.5 py-2 rounded-2xl border border-white/60 dark:border-white/5 shadow-xs transition-all hover:bg-white/60 dark:hover:bg-slate-950/30">
+              <button
+                type="button"
+                id="header-user-badge"
+                onClick={() => handleNavRedirect('profiles')}
+                className="flex items-center gap-2 sm:gap-3 bg-white/40 dark:bg-slate-950/20 px-3.5 py-2 rounded-2xl border border-white/60 dark:border-white/5 shadow-xs transition-all hover:bg-white/60 dark:hover:bg-slate-950/30 cursor-pointer text-left"
+                title="Switch or manage profiles"
+              >
                 <img
                   src={currentUser.photoUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(currentUser.name)}`}
                   alt={currentUser.name}
@@ -395,7 +421,7 @@ export default function App() {
                   <p className="text-[8px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">Active Profile</p>
                   <p className="text-xs font-bold text-slate-800 dark:text-white leading-tight mt-0.5">{currentUser.name}</p>
                 </div>
-              </div>
+              </button>
             )}
           </div>
         </header>
@@ -501,48 +527,33 @@ export default function App() {
           </div>
         ) : (
           <>
-            {/* Profile Switcher Block (Mandatory User Names Support) */}
-            <section id="profile-management-section">
-              <UserProfileManager
-                users={users}
-                currentUser={currentUser}
-                onSelectUser={handleSelectUser}
-                onAddUser={handleAddUser}
-                onUpdateUser={handleUpdateUser}
-                onDeleteUser={handleDeleteUser}
-              />
-            </section>
-
-            {/* Section Switcher Tabs: Salary Spend Tracker vs Income Inflows & Sources */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 md:bg-white/50 md:dark:bg-slate-900/40 backdrop-blur-none md:backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-2xl p-2 shadow-xs">
-              <div className="flex items-center gap-2 p-1 bg-slate-100 dark:bg-slate-950/60 rounded-xl w-full sm:w-auto">
+            {/* Section Switcher Tabs: Just Salary Tracker and Income Inflow */}
+            <div id="section-switcher-bar" className="scroll-mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 md:bg-white/50 md:dark:bg-slate-900/40 backdrop-blur-none md:backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-2xl p-2 shadow-xs">
+              <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-950/60 rounded-xl w-full sm:w-auto">
                 <button
                   type="button"
-                  onClick={() => {
-                    setActiveSection('salary_tracker');
-                    setPreselectedIncomeId(null);
-                  }}
-                  className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-black transition-all cursor-pointer ${
+                  onClick={() => handleNavRedirect('salary')}
+                  className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-black transition-all cursor-pointer whitespace-nowrap ${
                     activeSection === 'salary_tracker'
                       ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   <CreditCard className="w-3.5 h-3.5" />
-                  <span>Salary Spend Tracker</span>
+                  <span>Salary Tracker</span>
                 </button>
 
                 <button
                   type="button"
-                  onClick={() => setActiveSection('income_tracker')}
-                  className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-black transition-all cursor-pointer ${
+                  onClick={() => handleNavRedirect('inflows')}
+                  className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-black transition-all cursor-pointer whitespace-nowrap ${
                     activeSection === 'income_tracker'
                       ? 'bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shadow-sm'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   <ArrowDownLeft className="w-3.5 h-3.5" />
-                  <span>Income Inflow Tracker</span>
+                  <span>Income Inflow</span>
                   {currentUserIncomes.length > 0 && (
                     <span className="text-[10px] font-black px-1.5 py-0.2 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
                       {currentUserIncomes.length}
@@ -555,20 +566,22 @@ export default function App() {
               <div className="hidden sm:flex items-center gap-2 text-xs font-semibold px-2 text-slate-500 dark:text-slate-400">
                 {activeSection === 'salary_tracker' ? (
                   <span>Tracking base salary & 50/30/20 budgets</span>
-                ) : (
+                ) : activeSection === 'income_tracker' ? (
                   <span>Tracking incoming funds & allocations</span>
+                ) : (
+                  <span>Managing user profiles</span>
                 )}
               </div>
             </div>
 
-            {/* View Switching: Salary Spend Tracker vs Income Inflow Tracker */}
+            {/* View Switching: Salary Spend Tracker vs Income Inflow Tracker vs User Profiles */}
             {activeSection === 'salary_tracker' ? (
               /* Dashboard and Core Controls Grid */
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-start">
                 
                 {/* Left Column (Stats & Visualizations) - 7 cols on large screens */}
                 <div className="lg:col-span-7 space-y-4 sm:space-y-6">
-                  <section id="dashboard-overview-section">
+                  <section id="dashboard-overview-section" className="scroll-mt-6">
                     <DashboardOverview
                       currentUser={currentUser}
                       transactions={salaryTransactions}
@@ -579,7 +592,7 @@ export default function App() {
                     />
                   </section>
 
-                  <section id="category-distribution-section">
+                  <section id="category-distribution-section" className="scroll-mt-6">
                     <ExpenseCategoryList
                       transactions={salaryTransactions}
                       selectedMonth={selectedMonth}
@@ -600,7 +613,7 @@ export default function App() {
                     />
                   </section>
 
-                  <section id="transactions-log-section">
+                  <section id="transactions-log-section" className="scroll-mt-6">
                     <TransactionList
                       currentUser={currentUser}
                       transactions={salaryTransactions}
@@ -611,8 +624,8 @@ export default function App() {
                   </section>
                 </div>
               </div>
-            ) : (
-              <section id="income-tracker-section">
+            ) : activeSection === 'income_tracker' ? (
+              <section id="income-tracker-section" className="scroll-mt-6">
                 <IncomeTracker
                   currentUser={currentUser}
                   incomes={currentUserIncomes}
@@ -625,7 +638,24 @@ export default function App() {
                   onAddTransaction={handleAddTransaction}
                   onDeleteTransaction={handleDeleteTransaction}
                   onUpdateTransaction={handleUpdateTransaction}
-                  onSelectUser={handleSelectUser}
+                  onSelectUser={(id) => {
+                    handleSelectUser(id);
+                    setActiveSection('income_tracker');
+                  }}
+                />
+              </section>
+            ) : (
+              <section id="profile-management-section" className="scroll-mt-6">
+                <UserProfileManager
+                  users={users}
+                  currentUser={currentUser}
+                  onSelectUser={(id) => {
+                    handleSelectUser(id);
+                  }}
+                  onAddUser={handleAddUser}
+                  onUpdateUser={handleUpdateUser}
+                  onDeleteUser={handleDeleteUser}
+                  onNavigateSection={(sec) => handleNavRedirect(sec)}
                 />
               </section>
             )}
@@ -683,7 +713,7 @@ export default function App() {
                   }}
                   selectedMonth={selectedMonth}
                   isModal={true}
-                  incomes={currentUserIncomes}
+                  incomes={activeSection === 'income_tracker' ? currentUserIncomes : []}
                   transactions={currentUserTransactions}
                   preselectedIncomeId={preselectedIncomeId}
                 />
@@ -749,25 +779,25 @@ export default function App() {
           )}
         </AnimatePresence>
 
-        {/* Mobile Bottom Navigation Dock */}
+        {/* Floating & Fixed Navigation Dock (Mobile Only) */}
         {currentUser && (
-          <nav className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-t border-slate-200/90 dark:border-white/10 px-2 pt-2 pb-[max(0.6rem,env(safe-area-inset-bottom))] shadow-[0_-4px_24px_rgba(15,23,42,0.08)] dark:shadow-[0_-4px_24px_rgba(0,0,0,0.5)] grid grid-cols-4 items-center">
+          <nav
+            aria-label="Floating Navigation Bar"
+            className="fixed bottom-5 sm:bottom-7 inset-x-0 mx-auto z-50 w-[calc(100%-1.5rem)] max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-white/90 dark:border-white/15 rounded-3xl p-1.5 shadow-[0_20px_50px_rgba(15,23,42,0.22),0_4px_16px_rgba(15,23,42,0.08)] dark:shadow-[0_24px_54px_rgba(0,0,0,0.85),0_0_0_1px_rgba(255,255,255,0.1)] grid grid-cols-4 items-center gap-1 ring-1 ring-slate-900/5 dark:ring-white/10 pointer-events-auto select-none md:hidden"
+          >
             {/* Tab 1: Salary Tracker */}
             <button
               type="button"
-              onClick={() => {
-                setActiveSection('salary_tracker');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`flex flex-col items-center justify-center min-h-[48px] w-full py-1 rounded-xl transition-all cursor-pointer tap-highlight-transparent select-none active:scale-95 ${
+              onClick={() => handleNavRedirect('salary')}
+              className={`flex flex-col items-center justify-center min-h-[46px] w-full py-1.5 px-2 rounded-2xl transition-colors duration-150 cursor-pointer tap-highlight-transparent select-none ${
                 activeSection === 'salary_tracker'
-                  ? 'text-blue-600 dark:text-blue-400 font-bold'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 font-medium'
+                  ? 'bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-bold shadow-xs'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100/60 dark:hover:bg-slate-800/40 font-medium'
               }`}
               aria-label="Salary Tracker"
             >
               <CreditCard className="w-5 h-5 transition-transform" />
-              <span className="text-[10px] tracking-tight mt-1">Salary</span>
+              <span className="text-[10px] tracking-tight mt-0.5">Salary</span>
               {activeSection === 'salary_tracker' && (
                 <span className="w-1.5 h-1 rounded-full bg-blue-600 dark:bg-blue-400 mt-0.5" />
               )}
@@ -776,14 +806,11 @@ export default function App() {
             {/* Tab 2: Income Inflows */}
             <button
               type="button"
-              onClick={() => {
-                setActiveSection('income_tracker');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`flex flex-col items-center justify-center min-h-[48px] w-full py-1 rounded-xl transition-all cursor-pointer tap-highlight-transparent select-none active:scale-95 relative ${
+              onClick={() => handleNavRedirect('inflows')}
+              className={`flex flex-col items-center justify-center min-h-[46px] w-full py-1.5 px-2 rounded-2xl transition-colors duration-150 cursor-pointer tap-highlight-transparent select-none relative ${
                 activeSection === 'income_tracker'
-                  ? 'text-emerald-600 dark:text-emerald-400 font-bold'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 font-medium'
+                  ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-bold shadow-xs'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100/60 dark:hover:bg-slate-800/40 font-medium'
               }`}
               aria-label="Income Inflows"
             >
@@ -795,7 +822,7 @@ export default function App() {
                   </span>
                 )}
               </div>
-              <span className="text-[10px] tracking-tight mt-1">Inflows</span>
+              <span className="text-[10px] tracking-tight mt-0.5">Inflows</span>
               {activeSection === 'income_tracker' && (
                 <span className="w-1.5 h-1 rounded-full bg-emerald-600 dark:bg-emerald-400 mt-0.5" />
               )}
@@ -805,10 +832,10 @@ export default function App() {
             <button
               type="button"
               onClick={() => setIsMobileFormOpen(true)}
-              className="flex flex-col items-center justify-center min-h-[48px] w-full py-1 cursor-pointer tap-highlight-transparent select-none group"
+              className="flex flex-col items-center justify-center min-h-[46px] w-full py-1 cursor-pointer tap-highlight-transparent select-none group"
               aria-label="Record New Expense"
             >
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-blue-500 active:from-blue-700 active:to-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/25 group-active:scale-90 transition-transform">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 active:from-blue-700 active:to-indigo-700 text-white flex items-center justify-center shadow-md shadow-blue-500/25 group-hover:scale-105 active:scale-95 transition-transform">
                 <Plus className="w-5 h-5 stroke-[2.5]" />
               </div>
               <span className="text-[9px] font-bold text-slate-600 dark:text-slate-300 mt-0.5">Add</span>
@@ -817,15 +844,26 @@ export default function App() {
             {/* Tab 4: Profiles */}
             <button
               type="button"
-              onClick={() => {
-                const el = document.getElementById('profile-management-section');
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="flex flex-col items-center justify-center min-h-[48px] w-full py-1 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 font-medium cursor-pointer tap-highlight-transparent select-none active:scale-95"
+              onClick={() => handleNavRedirect('profiles')}
+              className={`flex flex-col items-center justify-center min-h-[46px] w-full py-1.5 px-2 rounded-2xl transition-colors duration-150 cursor-pointer tap-highlight-transparent select-none relative ${
+                activeSection === 'profiles'
+                  ? 'bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 font-bold shadow-xs'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100/60 dark:hover:bg-slate-800/40 font-medium'
+              }`}
               aria-label="User Profiles"
             >
-              <Users className="w-5 h-5 transition-transform" />
-              <span className="text-[10px] tracking-tight mt-1">Profiles</span>
+              <div className="relative">
+                <Users className="w-5 h-5 transition-transform" />
+                {users.length > 0 && (
+                  <span className="absolute -top-1 -right-2 px-1 min-w-[14px] h-3.5 rounded-full bg-purple-500 text-white text-[9px] font-black flex items-center justify-center leading-none shadow-xs">
+                    {users.length}
+                  </span>
+                )}
+              </div>
+              <span className="text-[10px] tracking-tight mt-0.5">Profiles</span>
+              {activeSection === 'profiles' && (
+                <span className="w-1.5 h-1 rounded-full bg-purple-600 dark:bg-purple-400 mt-0.5" />
+              )}
             </button>
           </nav>
         )}
